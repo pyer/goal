@@ -1,5 +1,9 @@
 # Prerequisites
-*.d
+*~
+goal
+hello/hello
+v/v
+v/hello
 
 # Object files
 *.o
