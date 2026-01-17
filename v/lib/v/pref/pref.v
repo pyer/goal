@@ -81,7 +81,6 @@ pub mut:
 	is_trace           bool     // turn on possibility to trace fn call where v.debug is imported
 	is_check_return    bool     // -check-return, will make V produce notices about *all* call expressions with unused results. NOTE: experimental!
 	is_check_overflow  bool     // -check-overflow, will panic on integer overflow
-	eval_argument      string   // `println(2+2)` on `v -e "println(2+2)"`. Note that this source code, will be evaluated in vsh mode, so 'v -e 'println(ls(".")!)' is valid.
   keepc              bool     // keep the C source file
 	test_runner        string   // can be 'simple' (fastest, but much less detailed), 'tap', 'normal'
 	profile_file       string   // the profile results will be stored inside profile_file

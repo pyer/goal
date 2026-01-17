@@ -270,9 +270,6 @@ pub fn (b &Builder) import_graph() &depgraph.DepGraph {
 		mut deps := []string{}
 		if p.mod.name !in builtins {
 			deps << 'builtin'
-			if p.path.ends_with('.vsh') {
-				deps << 'os'
-			}
 		}
 		for m in p.imports {
 			if m.mod == p.mod.name {

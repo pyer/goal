@@ -318,18 +318,17 @@ pub fn get_vtmp_folder() string {
 	return os.vtmp_dir()
 }
 
-// find_all_v_files - given a list of files/folders, finds all .v/.vsh files
+// find_all_v_files - given a list of files/folders, finds all .v files
 // if some of the files/folders on the list does not exist, or a file is not
-// a .v or .vsh file, returns an error instead.
+// a .v file, returns an error instead.
 pub fn find_all_v_files(roots []string) ![]string {
 	mut files := []string{}
 	for file in roots {
 		if os.is_dir(file) {
 			files << os.walk_ext(file, '.v')
-			files << os.walk_ext(file, '.vsh')
 			continue
 		}
-		if !file.ends_with('.v') && !file.ends_with('.vv') && !file.ends_with('.vsh') {
+		if !file.ends_with('.v')
 			return error('v fmt can only be used on .v files.\nOffending file: "${file}"')
 		}
 		if !os.exists(file) {
