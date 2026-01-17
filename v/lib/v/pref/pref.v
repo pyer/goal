@@ -83,11 +83,7 @@ pub mut:
 	is_check_overflow  bool     // -check-overflow, will panic on integer overflow
   keepc              bool     // keep the C source file
 	test_runner        string   // can be 'simple' (fastest, but much less detailed), 'tap', 'normal'
-	profile_file       string   // the profile results will be stored inside profile_file
-	profile_no_inline  bool     // when true, @[inline] functions would not be profiled
-	profile_fns        []string // when set, profiling will be off by default, but inside these functions (and what they call) it will be on.
 	translated         bool     // `v translate doom.v` are we running V code translated from C? allow globals, ++ expressions, etc
-	translated_go      bool = true // Are we running V code translated from Go? Allow err shadowing
 	hide_auto_str      bool // `v -hide-auto-str program.v`, doesn't generate str() with struct data
 	sanitize               bool // use Clang's new "-fsanitize" option
 	show_cc                bool   // -showcc, print cc command
@@ -305,10 +301,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 			}
 			'-translated' {
 				res.translated = true
-			}
-			'-translated-go' {
-				println('got -translated-go')
-				res.translated_go = true
 			}
 			'-m32', '-m64' {
 				res.m64 = arg[2] == `6`
