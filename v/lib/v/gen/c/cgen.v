@@ -64,7 +64,6 @@ mut:
 	waiter_fn_definitions     strings.Builder            // waiter fns definitions
 	auto_str_funcs            strings.Builder            // function bodies of all auto generated _str funcs
 	dump_funcs                strings.Builder            // function bodies of all auto generated _str funcs
-	pcs_declarations          strings.Builder            // -prof profile counter declarations for each function
 	embedded_data             strings.Builder            // data to embed in the executable/binary
 	shared_types              strings.Builder            // shared/lock types
 	shared_functions          strings.Builder            // shared constructors
@@ -175,7 +174,6 @@ mut:
 	assign_op                 token.Kind // *=, =, etc (for array_set)
 	defer_stmts               []ast.DeferStmt
 	defer_ifdef               string
-	defer_profile_code        string
 	defer_vars                []string
 	closure_structs           []string
 	str_types                 []StrType       // types that need automatic str() generation
@@ -195,7 +193,6 @@ mut:
 	sumtype_definitions       map[u32]bool    // `_TypeA_to_sumtype_TypeB()` fns that have been generated
 	trace_fn_definitions      []string
 	json_types                []ast.Type           // to avoid json gen duplicates
-	pcs                       []ProfileCounterMeta // -prof profile counter fn_names => fn counter name
 	embedded_files            []ast.EmbeddedFile
 	sql_i                     int
 	sql_stmt_name             string
@@ -317,7 +314,6 @@ pub fn gen(files []&ast.File, mut table ast.Table, pref_ &pref.Preferences) stri
 		gowrappers:           strings.new_builder(100)
 		auto_str_funcs:       strings.new_builder(100)
 		dump_funcs:           strings.new_builder(100)
-		pcs_declarations:     strings.new_builder(100)
 		embedded_data:        strings.new_builder(1000)
 		out_options_forward:  strings.new_builder(100)
 		out_options:          strings.new_builder(100)
@@ -446,36 +442,13 @@ pub fn gen(files []&ast.File, mut table ast.Table, pref_ &pref.Preferences) stri
 
 	mut b := strings.new_builder(g.out.len + 600_000)
 	b.write_string(g.hashes())
-	if g.use_segfault_handler || g.pref.is_prof {
+	if g.use_segfault_handler {
 		b.writeln('\n#define V_USE_SIGNAL_H')
 	}
 	b.write_string2('\n// V comptime_definitions:\n', g.comptime_definitions.str())
 	b.write_string2('\n// V typedefs:\n', g.typedefs.str())
 	b.write_string2('\n // V preincludes:\n', g.preincludes.str())
 	b.write_string2('\n// V cheaders:\n', g.cheaders.str())
-	if g.pcs_declarations.len > 0 {
-		g.pcs_declarations.writeln('// V profile thread local:')
-		g.pcs_declarations.writeln('#if defined(__cplusplus) && __cplusplus >= 201103L')
-		g.pcs_declarations.writeln('\t#define PROF_THREAD_LOCAL thread_local')
-		g.pcs_declarations.writeln('#elif defined(__GNUC__) && __GNUC__ < 5')
-		g.pcs_declarations.writeln('\t#define PROF_THREAD_LOCAL __thread')
-		g.pcs_declarations.writeln('#elif defined(_MSC_VER)')
-		g.pcs_declarations.writeln('\t#define PROF_THREAD_LOCAL __declspec(thread)')
-		g.pcs_declarations.writeln('#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_THREADS__)')
-		g.pcs_declarations.writeln('\t#define PROF_THREAD_LOCAL _Thread_local')
-		g.pcs_declarations.writeln('#endif')
-		g.pcs_declarations.writeln('#ifndef PROF_THREAD_LOCAL')
-		g.pcs_declarations.writeln('\t#if defined(__GNUC__)')
-		g.pcs_declarations.writeln('\t\t#define PROF_THREAD_LOCAL __thread')
-		g.pcs_declarations.writeln('\t#endif')
-		g.pcs_declarations.writeln('#endif')
-		g.pcs_declarations.writeln('#ifdef PROF_THREAD_LOCAL')
-		g.pcs_declarations.writeln('\tstatic PROF_THREAD_LOCAL double prof_measured_time = 0.0;')
-		g.pcs_declarations.writeln('#else')
-		g.pcs_declarations.writeln('\tdouble prof_measured_time = 0.0; // multithreaded: wrong values for func times without its children')
-		g.pcs_declarations.writeln('#endif')
-		b.write_string2('\n// V profile counters:\n', g.pcs_declarations.str())
-	}
 	b.write_string2('\n// V includes:\n', g.includes.str())
 	b.writeln('\n// V global/const #define ... :')
 	for var_name in g.sorted_global_const_names {
@@ -640,7 +613,6 @@ pub fn (mut g Gen) free_builders() {
 		g.auto_str_funcs.free()
 		g.dump_funcs.free()
 		g.comptime_definitions.free()
-		g.pcs_declarations.free()
 		g.embedded_data.free()
 		g.shared_types.free()
 		g.shared_functions.free()
@@ -792,9 +764,6 @@ pub fn (mut g Gen) init() {
 	if g.pref.is_test {
 		g.comptime_definitions.writeln('#define _VTEST (1)')
 	}
-	if g.pref.is_prof {
-		g.comptime_definitions.writeln('#define _VPROFILE (1)')
-	}
 	if g.pref.autofree {
 		g.comptime_definitions.writeln('#define _VAUTOFREE (1)')
 	}
@@ -816,9 +785,6 @@ pub fn (mut g Gen) init() {
 }
 
 pub fn (mut g Gen) finish() {
-	if g.pref.is_prof && g.pref.build_mode != .build_module {
-		g.gen_vprint_profile_stats()
-	}
 	g.handle_embedded_files_finish()
 	if g.pref.is_test {
 		g.gen_c_main_for_tests()
@@ -5859,7 +5825,7 @@ fn (mut g Gen) return_stmt(node ast.Return) {
 		}
 		return
 	}
-	mut use_tmp_var := g.defer_stmts.len > 0 || g.defer_profile_code.len > 0
+	mut use_tmp_var := g.defer_stmts.len > 0
 		|| g.cur_lock.lockeds.len > 0
 		|| (fn_return_is_multi && exprs_len >= 1 && fn_return_is_option)
 		|| fn_return_is_fixed_array_non_result

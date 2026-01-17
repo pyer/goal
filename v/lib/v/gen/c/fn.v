@@ -425,10 +425,6 @@ fn (mut g Gen) gen_fn_decl(node &ast.FnDecl, skip bool) {
 		}
 	}
 	g.indent--
-	// Profiling mode? Start counting at the beginning of the function (save current time).
-	if g.pref.is_prof && g.pref.build_mode != .build_module {
-		g.profile_fn(node)
-	}
 	// we could be in an anon fn so save outer fn defer stmts
 	prev_defer_stmts := g.defer_stmts
 	g.defer_stmts = []

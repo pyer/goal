@@ -67,7 +67,6 @@ pub mut:
 	is_script          bool   // single file mode (`v program.v`), main function can be skipped
 	is_vsh             bool   // v script (`file.vsh`) file, the `os` module should be made global
 	raw_vsh_tmp_prefix string // The prefix used for executables, when a script lacks the .vsh extension
-	is_prof            bool   // benchmark every function
 	is_prod            bool   // use "-O3"
 	no_prod_options    bool   // `-no-prod-options`, means do not pass any optimization flags to the C compilation, while still allowing the user to use for example `-cflags -Os` to pass custom ones
 	is_repl            bool

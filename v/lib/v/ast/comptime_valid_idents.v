@@ -111,9 +111,6 @@ pub fn eval_comptime_not_user_defined_ident(ident string, the_pref &pref.Prefere
 			'threads' {
 				return error('threads should handle outside of `check_valid_ident()`')
 			}
-			'profile' {
-				is_true = the_pref.is_prof
-			}
 			'wasm32' {
 				is_true = the_pref.arch == .wasm32
 			}

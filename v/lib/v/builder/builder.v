@@ -66,6 +66,7 @@ pub fn new_builder(pref_ &pref.Preferences) Builder {
 	}
 }
 
+/*
 pub fn (mut b Builder) front_stages(v_files []string) ! {
 	mut timers := util.get_timers()
 	util.timing_start('ALL_FRONT_STAGES')
@@ -87,6 +88,7 @@ pub fn (mut b Builder) front_stages(v_files []string) ! {
 		return error_with_code('stop_after_parser', 7001)
 	}
 }
+*/
 
 pub fn (mut b Builder) middle_stages() ! {
 	util.timing_start('CHECK')
@@ -138,15 +140,14 @@ pub fn (mut b Builder) middle_stages() ! {
 }
 
 // parse all deps from already parsed files
-pub fn (mut b Builder) parse_imports() {
+pub fn (mut b Builder) parse_imports(files []&ast.File) {
 	util.timing_start(@METHOD)
 	defer {
 		util.timing_measure(@METHOD)
 	}
+  b.parsed_files = files
 	mut done_imports := []string{}
-	if b.pref.is_vsh {
-		done_imports << 'os'
-	}
+
 	// TODO: (joe): decide if this is correct solution.
 	// in the case of building a module, the actual module files
 	// are passed via cmd line, so they have already been parsed

@@ -40,7 +40,6 @@ fn (mut g Gen) gen_c_main_header() {
 	if !g.pref.no_builtin {
 		g.writeln('\t_vinit(___argc, (voidptr)___argv);')
 	}
-	g.gen_c_main_profile_hook()
 }
 
 pub fn (mut g Gen) gen_c_main_footer() {
@@ -79,24 +78,6 @@ pub fn (mut g Gen) gen_failing_return_error_for_test_fn(return_stmt ast.Return, 
 	g.writeln('\tlongjmp(g_jump_buffer, 1);')
 }
 
-pub fn (mut g Gen) gen_c_main_profile_hook() {
-	if g.pref.is_prof {
-		g.writeln2('', '\tsignal(SIGINT, vprint_profile_stats_on_signal);')
-		g.writeln('\tsignal(SIGTERM, vprint_profile_stats_on_signal);')
-		g.writeln2('\tatexit(vprint_profile_stats);', '')
-	}
-	if g.pref.profile_file != '' {
-		if 'no_profile_startup' in g.pref.compile_defines {
-			g.writeln('vreset_profile_stats();')
-		}
-		if g.pref.profile_fns.len > 0 {
-			g.writeln('vreset_profile_stats();')
-			// v__profile_enabled will be set true *inside* the fns in g.pref.profile_fns:
-			g.writeln('v__profile_enabled = false;')
-		}
-	}
-}
-
 pub fn (mut g Gen) gen_c_main_for_tests() {
 	main_fn_start_pos := g.out.len
 	g.writeln('')
@@ -105,7 +86,6 @@ pub fn (mut g Gen) gen_c_main_for_tests() {
 	if !g.pref.no_builtin {
 		g.writeln('\t_vinit(___argc, (voidptr)___argv);')
 	}
-	g.gen_c_main_profile_hook()
 
 	mut all_tfuncs := g.get_all_test_function_names()
 	g.writeln('\tstring v_test_file = ${ctoslit(g.pref.path)};')

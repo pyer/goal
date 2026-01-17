@@ -2,6 +2,8 @@ import os
 import v.pref
 import v.util
 import v.builder
+import v.parser
+
 import v.gen.c
 import v.compiler
 
@@ -39,21 +41,24 @@ fn main() {
 
   mut files := b.get_builtin_files()
   files << b.get_user_files()
-  if b.pref.is_verbose {
+  if prefs.is_verbose {
     println('files: ')
     println(files)
   }
 
-  b.front_stages(files)!
+  //b.front_stages(files)!
+	parsed_files := parser.parse_files(files, mut b.table, prefs)
+	b.parse_imports(parsed_files)
+
   b.middle_stages()!
 
   // Generate C source
-  out_name_c := b.pref.path[..b.pref.path.len - 1] + 'c'
-  source := c.gen(b.parsed_files, mut b.table, b.pref)
+  out_name_c := prefs.path[..prefs.path.len - 1] + 'c'
+  source := c.gen(b.parsed_files, mut b.table, prefs)
   os.write_file_array(out_name_c, source) or { panic(err) }
 
   // Compile C source
-  compiler.cc(out_name_c, b.pref)
+  compiler.cc(out_name_c, prefs)
 
   util.free_caches()
 }

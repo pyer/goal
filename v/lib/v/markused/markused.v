@@ -182,11 +182,6 @@ pub fn mark_used(mut table ast.Table, mut pref_ pref.Preferences, ast_files []&a
 				all_fn_root_names << k
 				continue
 			}
-			if pref_.is_prof && (k.starts_with('time.vpc_now') || k.starts_with('v.profile.')) {
-				// needed for -profile
-				all_fn_root_names << k
-				continue
-			}
 			if k.ends_with('.lock') || k.ends_with('.unlock') || k.ends_with('.rlock')
 				|| k.ends_with('.runlock') {
 				all_fn_root_names << k

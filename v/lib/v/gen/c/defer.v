@@ -62,8 +62,4 @@ fn (mut g Gen) write_defer_stmts_when_needed(scope &ast.Scope, lookup bool, pos 
 	if g.defer_stmts.len > 0 {
 		g.write_defer_stmts(scope, lookup, pos)
 	}
-	if g.defer_profile_code.len > 0 {
-		g.writeln2('', '\t// defer_profile_code')
-		g.writeln2(g.defer_profile_code, '')
-	}
 }
