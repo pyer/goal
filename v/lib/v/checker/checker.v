@@ -419,7 +419,7 @@ pub fn (mut c Checker) check_files(ast_files []&ast.File) {
 			c.timers.show('checker_check ${file.path}')
 		}
 		if has_main_mod_file && !has_main_fn && files_from_main_module.len > 0 {
-			if c.pref.is_script && !c.pref.is_test {
+			if !c.pref.is_test {
 				// files_from_main_module contain preludes at the start
 				mut the_main_file := files_from_main_module.last()
 				the_main_file.stmts << ast.FnDecl{

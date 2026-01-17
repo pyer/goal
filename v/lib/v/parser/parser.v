@@ -428,6 +428,9 @@ pub fn parse_files(paths []string, mut table ast.Table, pref_ &pref.Preferences)
 	unsafe {
 		mut files := []&ast.File{cap: paths.len}
 		for path in paths {
+      if pref_.is_verbose {
+        println('parse file: ${path}')
+      }
 			timers.start('parse_file ${path}')
 			files << parse_file(path, mut table, .skip_comments, pref_)
 			timers.show('parse_file ${path}')
@@ -889,7 +892,7 @@ fn comptime_if_expr_contains_top_stmt(if_expr ast.IfExpr) bool {
 
 fn (mut p Parser) other_stmts(cur_stmt ast.Stmt) ast.Stmt {
 	p.inside_fn = true
-	if p.pref.is_script && !p.pref.is_test {
+	if !p.pref.is_test {
 		p.script_mode = true
 		p.script_mode_start_token = p.tok
 

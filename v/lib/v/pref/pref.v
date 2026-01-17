@@ -64,9 +64,6 @@ pub mut:
 	// verbosity           VerboseLevel
 	is_verbose bool
 	is_test            bool   // `v test string_test.v`
-	is_script          bool   // single file mode (`v program.v`), main function can be skipped
-	is_vsh             bool   // v script (`file.vsh`) file, the `os` module should be made global
-	raw_vsh_tmp_prefix string // The prefix used for executables, when a script lacks the .vsh extension
 	is_prod            bool   // use "-O3"
 	no_prod_options    bool   // `-no-prod-options`, means do not pass any optimization flags to the C compilation, while still allowing the user to use for example `-cflags -Os` to pass custom ones
 	is_repl            bool
@@ -107,7 +104,6 @@ pub mut:
 	// You could pass several -cflags XXX arguments. They will be merged with each other.
 	// You can also quote several options at the same time: -cflags '-Os -fno-inline-small-functions'.
 	m64                       bool         // true = generate 64-bit code, defaults to x64
-	third_party_option        string
 	no_bounds_checking        bool   // `-no-bounds-checking` turns off *all* bounds checks for all functions at runtime, as if they all had been tagged with `@[direct_array_access]`
 	force_bounds_checking     bool   // `-force-bounds-checking` turns ON *all* bounds checks, even for functions that *were* tagged with `@[direct_array_access]`
 	autofree                  bool   // `v -manualfree` => false, `v -autofree` => true; false by default for now.
@@ -142,10 +138,6 @@ pub mut:
 	compile_values      map[string]string // the map will contain for `-d key=value`: compile_values['key'] = 'value', and for `-d ident`, it will be: compile_values['ident'] = 'true'
 
 	run_args     []string // `v run x.v 1 2 3` => `1 2 3`
-	printfn_list []string // a list of generated function names, whose source should be shown, for debugging
-
-	print_v_files       bool // when true, just print the list of all parsed .v files then stop.
-	print_watched_files bool // when true, just print the list of all parsed .v files + all the compiled $tmpl files, then stop. Used by `v watch run webserver.v`
 
 	skip_warnings    bool // like C's "-w", forces warnings to be ignored.
 	skip_notes       bool // force notices to be ignored/not shown.
@@ -385,16 +377,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 			}
 			'-no-closures' {
 				res.no_closures = true
-			}
-			'-print-v-files' {
-				res.print_v_files = true
-			}
-			'-print-watched-files' {
-				res.print_watched_files = true
-			}
-			'-printfn' {
-				res.printfn_list << cmdline.option(args[i..], '-printfn', '').split(',')
-				i++
 			}
 			'-d', '-define' {
 				if define := args[i..][1] {

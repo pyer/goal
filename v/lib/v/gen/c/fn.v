@@ -225,7 +225,6 @@ fn (mut g Gen) gen_fn_decl(node &ast.FnDecl, skip bool) {
 		// TODO: remove unsafe
 		g.cur_fn = node
 	}
-	fn_start_pos := g.out.len
 	is_closure := node.scope.has_inherited_vars()
 	mut cur_closure_ctx := ''
 	if is_closure {
@@ -466,9 +465,6 @@ fn (mut g Gen) gen_fn_decl(node &ast.FnDecl, skip bool) {
 		}
 	}
 	g.writeln('}')
-	if g.pref.printfn_list.len > 0 && g.last_fn_c_name in g.pref.printfn_list {
-		println(g.out.after(fn_start_pos))
-	}
 	weak := if node.is_weak { 'VWEAK ' } else { '' }
 	for attr in node.attrs {
 		if attr.name == 'export' {

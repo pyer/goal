@@ -8,14 +8,9 @@ pub fn (mut g Gen) gen_c_main() {
 		return
 	}
 	g.out.writeln('')
-	main_fn_start_pos := g.out.len
-
 	g.gen_c_main_header()
 	g.writeln('\tmain__main();')
 	g.gen_c_main_footer()
-	if g.pref.printfn_list.len > 0 && 'main' in g.pref.printfn_list {
-		println(g.out.after(main_fn_start_pos))
-	}
 }
 
 fn (mut g Gen) gen_c_main_function_only_header() {
@@ -79,7 +74,6 @@ pub fn (mut g Gen) gen_failing_return_error_for_test_fn(return_stmt ast.Return, 
 }
 
 pub fn (mut g Gen) gen_c_main_for_tests() {
-	main_fn_start_pos := g.out.len
 	g.writeln('')
 	g.gen_c_main_function_header()
 	g.writeln('\tmain__vtest_init();')
@@ -134,9 +128,6 @@ pub fn (mut g Gen) gen_c_main_for_tests() {
 	g.writeln2('\t_vtrunner._method__v_free(_vtobj);', '')
 	g.writeln2('\t_vcleanup();', '')
 	g.writeln2('\treturn test_exit_code;', '}')
-	if g.pref.printfn_list.len > 0 && 'main' in g.pref.printfn_list {
-		println(g.out.after(main_fn_start_pos))
-	}
 }
 
 pub fn (mut g Gen) gen_c_main_trace_calls_hook() {

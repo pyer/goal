@@ -119,10 +119,8 @@ fn (v &Builder) add_file_or_dir(mut user_files []string, dir string) {
 		verror("${dir} doesn't exist")
 	}
 	is_real_file := does_exist && !os.is_dir(dir)
-	resolved_link := if is_real_file && os.is_link(dir) { os.real_path(dir) } else { dir }
-	if is_real_file && (dir.ends_with('.v') || resolved_link.ends_with('.vsh')
-		|| v.pref.raw_vsh_tmp_prefix != '' || dir.ends_with('.vv')) {
-		single_v_file := if resolved_link.ends_with('.vsh') { resolved_link } else { dir }
+	if is_real_file && dir.ends_with('.v') {
+		single_v_file := dir
 		// Just compile one file and get parent dir
 		user_files << single_v_file
 		if v.pref.is_verbose {

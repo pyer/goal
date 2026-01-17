@@ -576,19 +576,6 @@ pub fn gen(files []&ast.File, mut table ast.Table, pref_ &pref.Preferences) stri
 	unsafe { helpers.free() }
 	unsafe { g.free_builders() }
 
-/*
-	return GenOutput{
-		header:           header
-		res_builder:      b
-		out_str:          out_str
-		out0_str:         shelpers
-		extern_str:       extern_out_str
-		out_fn_start_pos: out_fn_start_pos
-	}
-*/
-//	result := c.gen(b.parsed_files, mut b.table, b.pref)
-//	output2 := result.res_builder
-
 	util.timing_measure('C GEN')
   return b
 }
@@ -6309,8 +6296,6 @@ fn (mut g Gen) write_init_function() {
 		util.timing_measure(@METHOD)
 	}
 
-	fn_vinit_start_pos := g.out.len
-
 	// ___argv is declared as voidptr here, because that unifies the windows/unix logic
 	g.writeln('void _vinit(int ___argc, voidptr ___argv) {')
 
@@ -6415,11 +6400,7 @@ fn (mut g Gen) write_init_function() {
 	}
 
 	g.writeln('}')
-	if g.pref.printfn_list.len > 0 && '_vinit' in g.pref.printfn_list {
-		println(g.out.after(fn_vinit_start_pos))
-	}
 
-	fn_vcleanup_start_pos := g.out.len
 	g.writeln('void _vcleanup(void) {')
 	if g.pref.trace_calls && g.pref.should_trace_fn_name('_vcleanup') {
 		g.writeln('\tv__trace_calls__on_call(_S("_vcleanup"));')
@@ -6441,10 +6422,6 @@ fn (mut g Gen) write_init_function() {
 		g.writeln('\tdelete_photon_work_pool();')
 	}
 	g.writeln('}')
-	if g.pref.printfn_list.len > 0 && '_vcleanup' in g.pref.printfn_list {
-		println(g.out.after(fn_vcleanup_start_pos))
-	}
-
 }
 
 fn (mut g Gen) write_builtin_types() {

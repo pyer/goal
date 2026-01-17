@@ -216,26 +216,6 @@ pub fn (mut b Builder) parse_imports(files []&ast.File) {
 		}
 	}
 	b.resolve_deps()
-	$if trace_parsed_files ? {
-		b.show_parsed_files()
-	}
-	if b.pref.print_v_files {
-		b.show_parsed_files()
-		exit(0)
-	}
-	if b.pref.print_watched_files {
-		for p in b.parsed_files {
-			if p.is_parse_text {
-				// a generated snippet, `v watch` does not care about those, since they are duplicates for other files
-				continue
-			}
-			println(p.path)
-			for tp in p.template_paths {
-				println(tp)
-			}
-		}
-		exit(0)
-	}
 }
 
 pub fn (mut b Builder) resolve_deps() {
