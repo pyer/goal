@@ -99,10 +99,6 @@ pub mut:
 	show_callgraph         bool   // -show-callgraph, print the program callgraph, in a Graphviz DOT format to stdout
 	show_depgraph          bool   // -show-depgraph, print the program module dependency graph, in a Graphviz DOT format to stdout
 	show_unused_params     bool   // NOTE: temporary until making it a default.
-	dump_c_flags           string // `-dump-c-flags file.txt` - let V store all C flags, passed to the backend C compiler in `file.txt`, one C flag/value per line.
-	dump_modules           string // `-dump-modules modules.txt` - let V store all V modules, that were used by the compiled program in `modules.txt`, one module per line.
-	dump_files             string // `-dump-files files.txt` - let V store all V or .template file paths, that were used by the compiled program in `files.txt`, one path per line.
-	dump_defines           string // `-dump-defines defines.txt` - let V store all the defines that affect the current program and their values, one define per line + `,` + its value.
 	use_os_system_to_run   bool // when set, use os.system() to run the produced executable, instead of os.new_process; works around segfaults on macos, that may happen when xcode is updated
 	// TODO: Convert this into a []string
 	cflags  string // Additional options which will be passed to the C compiler *before* other options.
@@ -359,22 +355,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 			}
 			'-test-runner' {
 				res.test_runner = cmdline.option(args[i..], arg, res.test_runner)
-				i++
-			}
-			'-dump-c-flags' {
-				res.dump_c_flags = cmdline.option(args[i..], arg, '-')
-				i++
-			}
-			'-dump-modules' {
-				res.dump_modules = cmdline.option(args[i..], arg, '-')
-				i++
-			}
-			'-dump-files' {
-				res.dump_files = cmdline.option(args[i..], arg, '-')
-				i++
-			}
-			'-dump-defines' {
-				res.dump_defines = cmdline.option(args[i..], arg, '-')
 				i++
 			}
 			'-experimental' {

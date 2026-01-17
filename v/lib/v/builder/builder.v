@@ -109,9 +109,6 @@ pub fn (mut b Builder) middle_stages() ! {
 	b.comptime.solve_files(b.parsed_files)
 	util.timing_measure('COMPTIME')
 
-	if b.pref.dump_defines != '' {
-		b.dump_defines()
-	}
 	mut mcache := vmod.get_cache()
 	mcache.debug()
 	b.print_warnings_and_errors()
@@ -239,12 +236,6 @@ pub fn (mut b Builder) parse_imports(files []&ast.File) {
 		}
 		exit(0)
 	}
-  /*
-	if b.pref.dump_files != '' {
-		b.dump_files(b.parsed_files.map(it.path))
-	}
-	b.rebuild_modules()
-  */
 }
 
 pub fn (mut b Builder) resolve_deps() {
@@ -270,7 +261,6 @@ pub fn (mut b Builder) resolve_deps() {
 	for node in deps_resolved.nodes {
 		mods << node.name
 	}
-	b.dump_modules(mods)
 	if b.pref.is_verbose {
 		eprintln('------ imported modules: ------')
 		eprintln(mods.str())
