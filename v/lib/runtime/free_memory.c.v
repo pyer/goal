@@ -1,11 +1,7 @@
 module runtime
 
-fn free_memory_impl() !usize {
-	$if cross ? {
-		return error('free_memory: not implemented')
-	}
-	$if !cross ? {
-		$if linux {
+// free_memory returns free physical memory found on the system.
+pub fn free_memory() !usize {
 			page_size := usize(C.sysconf(C._SC_PAGESIZE))
 			c_errno_1 := C.errno
 			if page_size == usize(-1) {
@@ -17,7 +13,5 @@ fn free_memory_impl() !usize {
 				return error('free_memory: `C.sysconf(C._SC_AVPHYS_PAGES)` return error code = ${c_errno_2}')
 			}
 			return page_size * av_phys_pages
-		}
-	}
-	return error('free_memory: not implemented')
 }
+

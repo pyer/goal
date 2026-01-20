@@ -22,9 +22,3 @@ pub fn total_memory() !usize {
 	return page_size * phys_pages
 }
 
-// free_memory returns free physical memory found on the system.
-// Note: implementation available only on Darwin, FreeBSD, Linux, OpenBSD and
-// Windows. Otherwise, returns 'free_memory: not implemented'.
-pub fn free_memory() !usize {
-	return free_memory_impl()!
-}
