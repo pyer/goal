@@ -1,7 +1,6 @@
 import os
 import v.pref
 import v.util
-import v.builder
 import v.ast
 import v.parser
 import v.checker
@@ -45,12 +44,11 @@ fn main() {
   }
 
   // Construct the V object from command line arguments
-  mut b := builder.new_builder(prefs)
-
-  mut files := b.get_builtin_files()
-  files << b.get_user_files()
+  println('Get builtin and user files')
+  mut files := parser.get_builtin_files(prefs)
+  files << parser.get_prelude_files(prefs)
+  files << parser.get_source_file(prefs)
   if prefs.is_verbose {
-    println('files: ')
     println(files)
   }
 
@@ -67,14 +65,13 @@ fn main() {
 
 	table.generic_insts_to_concrete()
 
-  println('Check new')
-	mut check := checker.new_checker(table, prefs)
   println('Check files')
+	mut check := checker.new_checker(table, prefs)
 	check.check_files(parsed_files)
 
 //	b.comptime.solve_files(parsed_files)
 
-	b.print_warnings_and_errors()
+//	b.print_warnings_and_errors()
 	if check.should_abort {
 		error('too many errors/warnings/notices')
     return

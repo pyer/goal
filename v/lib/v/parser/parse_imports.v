@@ -81,17 +81,6 @@ fn error_with_pos(s string, fpath string, pos token.Pos) errors.Error {
 		exit(1)
 }
 
-fn v_files_from_dir(dir string) []string {
-	if !os.exists(dir) {
-		util.verror('parse error', "${dir} doesn't exist")
-	} else if !os.is_dir(dir) {
-		util.verror('parse error', "${dir} isn't a directory!")
-	}
-
-	ret := os.ls(dir) or { panic(err) }
-  return ret
-}
-
 // graph of all imported modules
 fn import_graph(parsed_files []&ast.File) &depgraph.DepGraph {
 	builtins := util.builtin_module_parts.clone()
@@ -170,8 +159,9 @@ pub fn parse_imports(mut all_parsed_files []&ast.File, mut table ast.Table, pref
 				all_parsed_files[i].errors << error_with_pos('cannot import module "${mod}" (not found)', ast_file.path, imp.pos)
 				break
 			}
-			raw_files := v_files_from_dir(import_path)
-	    v_files := pref_.should_compile_filtered_files(import_path, raw_files)
+			v_files := v_files_from_dir(import_path)
+//			raw_files := v_files_from_dir(import_path)
+//	    v_files := pref_.should_compile_filtered_files(import_path, raw_files)
 			if v_files.len == 0 {
 				// v.parsers[i].error_with_token_index('cannot import module "$mod" (no .v files in "$import_path")', v.parsers[i].import_ast.get_import_tok_idx(mod))
 				all_parsed_files[i].errors << error_with_pos('cannot import module "${mod}" (no .v files in "${import_path}")', ast_file.path, imp.pos)
