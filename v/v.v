@@ -4,6 +4,7 @@ import v.util
 import v.ast
 import v.parser
 import v.checker
+import v.comptime
 import v.transformer
 
 import v.markused
@@ -53,41 +54,42 @@ fn main() {
   }
 
   // Parse files
-	//parsed_files []&ast.File
-	mut table := ast.new_table()
-	table.is_fmt = false
-	table.pointer_size = if prefs.m64 { 8 } else { 4 }
+  //parsed_files []&ast.File
+  mut table := ast.new_table()
+  table.is_fmt = false
+  table.pointer_size = if prefs.m64 { 8 } else { 4 }
 
   println('Parse files')
-	mut parsed_files := parser.parse_files(files, mut table, prefs)
+  mut parsed_files := parser.parse_files(files, mut table, prefs)
   println('Parse imports')
-	parser.parse_imports(mut parsed_files, mut table, prefs)
+  parser.parse_imports(mut parsed_files, mut table, prefs)
 
-	table.generic_insts_to_concrete()
+  table.generic_insts_to_concrete()
 
   println('Check files')
-	mut check := checker.new_checker(table, prefs)
-	check.check_files(parsed_files)
+  mut check := checker.new_checker(table, prefs)
+  check.check_files(parsed_files)
 
-//	b.comptime.solve_files(parsed_files)
+  mut ct := comptime.new_comptime_with_table(table, prefs)
+  ct.solve_files(parsed_files)
 
-//	b.print_warnings_and_errors()
-	if check.should_abort {
-		error('too many errors/warnings/notices')
+//  b.print_warnings_and_errors()
+  if check.should_abort {
+    error('too many errors/warnings/notices')
     return
-	}
-	if check.unresolved_fixed_sizes.len > 0 {
-		check.update_unresolved_fixed_sizes()
-	}
-	mut transf := transformer.new_transformer_with_table(table, prefs)
-	transf.transform_files(parsed_files)
-	table.complete_interface_check()
-	if prefs.skip_unused {
-		markused.mark_used(mut table, prefs, parsed_files)
-	}
-	if prefs.show_callgraph {
-		callgraph.show(mut table, prefs, parsed_files)
-	}
+  }
+  if check.unresolved_fixed_sizes.len > 0 {
+    check.update_unresolved_fixed_sizes()
+  }
+  mut transf := transformer.new_transformer_with_table(table, prefs)
+  transf.transform_files(parsed_files)
+  table.complete_interface_check()
+  if prefs.skip_unused {
+    markused.mark_used(mut table, prefs, parsed_files)
+  }
+  if prefs.show_callgraph {
+    callgraph.show(mut table, prefs, parsed_files)
+  }
 
   // Generate C source
   out_name_c := prefs.path[..prefs.path.len - 1] + 'c'
