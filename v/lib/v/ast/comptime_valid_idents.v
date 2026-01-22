@@ -9,7 +9,7 @@ pub const valid_comptime_if_platforms = ['amd64', 'i386', 'aarch64', 'arm64', 'a
 	'rv32', 's390x', 'ppc64le', 'loongarch64']
 pub const valid_comptime_if_cpu_features = ['x64', 'x32', 'little_endian', 'big_endian']
 pub const valid_comptime_if_other = ['apk', 'js', 'debug', 'prod', 'test', 'glibc', 'prealloc',
-	'no_bounds_checking', 'freestanding', 'threads', 'js_node', 'js_browser', 'js_freestanding',
+	'no_bounds_checking', 'threads', 'js_node', 'js_browser',
 	'interpreter', 'profile', 'wasm32', 'wasm32_wasi', 'fast_math', 'native', 'autofree']
 pub const valid_comptime_not_user_defined = all_valid_comptime_idents()
 pub const valid_comptime_compression_types = ['none', 'zlib']
@@ -105,9 +105,6 @@ pub fn eval_comptime_not_user_defined_ident(ident string, the_pref &pref.Prefere
 			'no_bounds_checking' {
 				is_true = the_pref.no_bounds_checking
 			}
-			'freestanding' {
-				is_true = the_pref.is_bare
-			}
 			'threads' {
 				return error('threads should handle outside of `check_valid_ident()`')
 			}
@@ -177,7 +174,6 @@ pub const system_ident_map = {
 	'glibc':              '__GLIBC__'
 	'prealloc':           '_VPREALLOC'
 	'no_bounds_checking': 'CUSTOM_DEFINE_no_bounds_checking'
-	'freestanding':       '_VFREESTANDING'
 	'autofree':           '_VAUTOFREE'
 	// CPU
 	'amd64':              '__V_amd64'

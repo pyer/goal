@@ -40,8 +40,6 @@ pub fn (mut p Preferences) fill_with_defaults() {
 
 	final_os := p.os.lower()
 	p.parse_define(final_os)
-
-	p.bare_builtin_dir = os.join_path(p.vroot, 'lib', 'builtin', 'linux_bare')
 }
 
 pub fn vexe_path() string {

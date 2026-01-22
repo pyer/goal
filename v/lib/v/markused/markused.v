@@ -52,9 +52,6 @@ pub fn mark_used(mut table ast.Table, pref_ &pref.Preferences, ast_files []&ast.
 		mut core_fns := [
 			'main.main',
 		]
-		if pref_.is_bare {
-			core_fns << 'init_global_allocator' // needed for linux_bare and wasm_bare
-		}
 		if 'use_libbacktrace' in pref_.compile_defines {
 			core_fns << 'print_libbacktrace'
 		}
@@ -148,16 +145,6 @@ pub fn mark_used(mut table ast.Table, pref_ &pref.Preferences, ast_files []&ast.
 		}
 		all_fn_root_names << core_fns
 
-	if pref_.is_bare {
-		all_fn_root_names << [
-			'strlen',
-			'memcmp',
-			'memcpy',
-			'realloc',
-			'vsnprintf',
-			'vsprintf',
-		]
-	}
 
 	for k, mut mfn in all_fns {
 		if trace_skip_unused_all_fns {

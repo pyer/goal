@@ -13,7 +13,6 @@ pub enum Arch {
 	loongarch64
 	js_node
 	js_browser
-	js_freestanding
 	wasm32
 	_max
 }
@@ -65,9 +64,6 @@ pub fn arch_from_string(arch_str string) !Arch {
 		}
 		'js_browser' {
 			return .js_browser
-		}
-		'js_freestanding' {
-			return .js_freestanding
 		}
 		'wasm32', 'wasm' {
 			return .wasm32

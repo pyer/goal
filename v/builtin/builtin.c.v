@@ -38,22 +38,14 @@ pub fn exit(code int) {
 // The same fn may be registered multiple times.
 // Each callback fn will called once for each registration.
 pub fn at_exit(cb FnExitCb) ! {
-	$if freestanding {
-		return error('at_exit not implemented with -freestanding')
-	} $else {
 		res := C.atexit(cb)
 		if res != 0 {
 			return error_with_code('at_exit failed', res)
 		}
-	}
 }
 
 fn v_segmentation_fault_handler(signal_number i32) {
-	$if freestanding {
-		eprintln('signal 11: segmentation fault')
-	} $else {
-		C.fprintf(C.stderr, c'signal %d: segmentation fault\n', signal_number)
-	}
+	C.fprintf(C.stderr, c'signal %d: segmentation fault\n', signal_number)
 	$if use_libbacktrace ? {
 		eprint_libbacktrace(1)
 	} $else {

@@ -24,15 +24,10 @@ fn v_files_from_dir(dir string) []string {
 pub fn get_builtin_files(pref_ &pref.Preferences) []string {
 	// Lookup for built-in folder in lookup path.
 	// Assumption: `builtin/` folder implies usable implementation of builtin
-	for location in pref_.lookup_path {
-		if os.exists(os.join_path(location, 'builtin')) {
+	if os.exists(os.join_path(pref_.vroot, 'builtin')) {
 			mut builtin_files := []string{}
-			builtin_files << v_files_from_dir(os.join_path(location, 'builtin'))
-			if pref_.is_bare {
-				builtin_files << v_files_from_dir(pref_.bare_builtin_dir)
-			}
+			builtin_files << v_files_from_dir(os.join_path(pref_.vroot, 'builtin'))
 			return builtin_files
-		}
 	}
 	return []
 }

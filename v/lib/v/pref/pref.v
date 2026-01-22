@@ -105,8 +105,6 @@ pub mut:
 	// generating_vh    bool
 	no_builtin       bool   // Skip adding the `builtin` module implicitly. The generated C code may not compile.
 	enable_globals   bool   // allow __global for low level code
-	is_bare          bool   // set by -freestanding
-	bare_builtin_dir string // Set by -bare-builtin-dir xyz/ . The xyz/ module should contain implementations of malloc, memset, etc, that are used by the rest of V's `builtin` module. That option is only useful with -freestanding (i.e. when is_bare is true).
 	no_closures      bool   // Produce a compile time error, if a closure was generated for any reason (an implicit receiver method was stored, or an explicit `fn [captured]()`).
 	lookup_path      []string
 	prealloc         bool

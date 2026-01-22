@@ -360,9 +360,6 @@ void _vcleanup(void);
 		// musl does not have that
 		#define pthread_rwlockattr_setkind_np(a, b)
 	#endif
-#ifdef _VFREESTANDING
-#undef _VFREESTANDING
-#endif
 '
 
 const c_builtin_types = '
@@ -422,31 +419,6 @@ typedef u64 (*MapHashFn)(voidptr);
 typedef bool (*MapEqFn)(voidptr, voidptr);
 typedef void (*MapCloneFn)(voidptr, voidptr);
 typedef void (*MapFreeFn)(voidptr);
-'
-
-const c_bare_headers = c_helper_macros + c_common_macros +
-	'
-#define _VFREESTANDING
-typedef long unsigned int size_t;
-// Memory allocation related headers
-void *malloc(size_t size);
-void *calloc(size_t nitems, size_t size);
-void *realloc(void *ptr, size_t size);
-void *memcpy(void *dest, void *src, size_t n);
-void *memset(void *s, int c, size_t n);
-void *memmove(void *dest, void *src, size_t n);
-// varargs implementation, TODO: works on tcc and gcc, but is very unportable and hacky
-typedef __builtin_va_list va_list;
-#define va_start(a, b) __builtin_va_start(a, b)
-#define va_end(a)      __builtin_va_end(a)
-#define va_arg(a, b)   __builtin_va_arg(a, b)
-#define va_copy(a, b)  __builtin_va_copy(a, b)
-//================================== GLOBALS =================================*/
-void _vinit(int ___argc, voidptr ___argv);
-void _vcleanup();
-#define sigaction_size sizeof(sigaction);
-#define _ARR_LEN(a) ( (sizeof(a)) / (sizeof(a[0])) )
-voidptr builtin__memdup(voidptr src, isize size);
 '
 
 const c_wyhash_headers = '

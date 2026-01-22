@@ -67,9 +67,7 @@ pub fn (mut ed EmbedFileData) data() &u8 {
 			ed.uncompressed = &u8(memdup(decompressed.data, ed.len))
 		}
 	} else {
-		$if !freestanding {
 			reload_from_file_at_runtime(mut ed)
-		}
 	}
 	return ed.uncompressed
 }

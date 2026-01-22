@@ -10,7 +10,7 @@ import v.pref
 import runtime
 
 // math.bits is needed by strconv.ftoa
-pub const builtin_module_parts = ['math.bits', 'strconv', 'dlmalloc', 'strconv.ftoa', 'strings',
+pub const builtin_module_parts = ['math.bits', 'strconv', 'strconv.ftoa', 'strings',
 	'builtin', 'builtin.closure', 'builtin.overflow']
 
 pub const external_module_dependencies_for_tool = {

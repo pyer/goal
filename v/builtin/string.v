@@ -2268,11 +2268,7 @@ pub fn (s &string) free() {
 	if s.is_lit == -98761234 {
 		double_free_msg := unsafe { &u8(c'double string.free() detected\n') }
 		double_free_msg_len := unsafe { vstrlen(double_free_msg) }
-		$if freestanding {
-			bare_eprint(double_free_msg, u64(double_free_msg_len))
-		} $else {
-			_write_buf_to_fd(1, double_free_msg, double_free_msg_len)
-		}
+		_write_buf_to_fd(1, double_free_msg, double_free_msg_len)
 		return
 	}
 	if s.is_lit == 1 || s.str == 0 {

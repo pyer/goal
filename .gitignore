@@ -5,6 +5,7 @@ hello/hello
 v/v
 v/v1
 v/hello
+sample/sample
 
 # Object files
 *.o

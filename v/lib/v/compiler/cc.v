@@ -163,12 +163,6 @@ fn ccompiler_options(ccompiler string, pref_ &pref.Preferences) CcompilerOptions
 	}
 
 	ccoptions.shared_postfix = '.so'
-	if pref_.is_bare {
-		ccoptions.args << '-fno-stack-protector'
-		ccoptions.args << '-ffreestanding'
-		ccoptions.linker_flags << '-static'
-		ccoptions.linker_flags << '-nostdlib'
-	}
 
 	ccoptions.wargs << '-Werror=implicit-function-declaration'
 
@@ -187,7 +181,7 @@ fn ccompiler_options(ccompiler string, pref_ &pref.Preferences) CcompilerOptions
 	ccoptions.pre_args << others
 	ccoptions.linker_flags << libs
 	// Without these libs compilation will fail on Linux
-	if !pref_.is_bare && pref_.build_mode != .build_module
+	if pref_.build_mode != .build_module
 		&& pref_.os in [.linux, .freebsd, .openbsd, .netbsd, .dragonfly, .solaris, .haiku] {
 		if pref_.os in [.freebsd, .netbsd] {
 			// Free/NetBSD: backtrace needs execinfo library while linking, also execinfo depends on elf.

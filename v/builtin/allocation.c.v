@@ -15,7 +15,7 @@ fn _memory_panic(fname string, size isize) {
 	// Note: do not use string interpolation here at all, since string interpolation itself allocates
 	eprint(fname)
 	eprint('(')
-	$if freestanding || vinix {
+	$if vinix {
 		eprint('size') // TODO: use something more informative here
 	} $else {
 		C.fprintf(C.stderr, c'%p', voidptr(size))
@@ -50,20 +50,8 @@ pub fn malloc(n isize) &u8 {
 		unsafe {
 			res = C.GC_MALLOC(n)
 		}
-	} $else $if freestanding {
-		// todo: is this safe to call malloc there? We export __malloc as malloc and it uses dlmalloc behind the scenes
-		// so theoretically it is safe
-		res = unsafe { __malloc(usize(n)) }
 	} $else {
-		$if windows {
-			// Warning! On windows, we always use _aligned_malloc to allocate memory.
-			// This ensures that we can later free the memory with _aligned_free
-			// without needing to track whether the memory was originally allocated
-			// by malloc or _aligned_malloc.
-			res = unsafe { C._aligned_malloc(n, 1) }
-		} $else {
 			res = unsafe { C.malloc(n) }
-		}
 	}
 	if res == 0 {
 		_memory_panic(@FN, n)
@@ -99,18 +87,8 @@ pub fn malloc_noscan(n isize) &u8 {
 				res = C.GC_MALLOC(n)
 			}
 		}
-	} $else $if freestanding {
-		res = unsafe { __malloc(usize(n)) }
 	} $else {
-		$if windows {
-			// Warning! On windows, we always use _aligned_malloc to allocate memory.
-			// This ensures that we can later free the memory with _aligned_free
-			// without needing to track whether the memory was originally allocated
-			// by malloc or _aligned_malloc.
-			res = unsafe { C._aligned_malloc(n, 1) }
-		} $else {
 			res = unsafe { C.malloc(n) }
-		}
 	}
 	if res == 0 {
 		_memory_panic(@FN, n)
@@ -153,18 +131,8 @@ pub fn malloc_uncollectable(n isize) &u8 {
 		unsafe {
 			res = C.GC_MALLOC_UNCOLLECTABLE(n)
 		}
-	} $else $if freestanding {
-		res = unsafe { __malloc(usize(n)) }
 	} $else {
-		$if windows {
-			// Warning! On windows, we always use _aligned_malloc to allocate memory.
-			// This ensures that we can later free the memory with _aligned_free
-			// without needing to track whether the memory was originally allocated
-			// by malloc or _aligned_malloc.
-			res = unsafe { C._aligned_malloc(n, 1) }
-		} $else {
 			res = unsafe { C.malloc(n) }
-		}
 	}
 	if res == 0 {
 		_memory_panic(@FN, n)
@@ -446,21 +414,8 @@ pub fn memdup_align(src voidptr, sz isize, align isize) voidptr {
 		unsafe {
 			res = C.GC_memalign(align, n)
 		}
-	} $else $if freestanding {
-		// todo: is this safe to call malloc there? We export __malloc as malloc and it uses dlmalloc behind the scenes
-		// so theoretically it is safe
-		panic('memdup_align is not implemented with -freestanding')
-		res = unsafe { __malloc(usize(n)) }
 	} $else {
-		$if windows {
-			// Warning! On windows, we always use _aligned_malloc to allocate memory.
-			// This ensures that we can later free the memory with _aligned_free
-			// without needing to track whether the memory was originally allocated
-			// by malloc or _aligned_malloc.
-			res = unsafe { C._aligned_malloc(n, align) }
-		} $else {
 			res = unsafe { C.aligned_alloc(align, n) }
-		}
 	}
 	if res == 0 {
 		_memory_panic(@FN, n)

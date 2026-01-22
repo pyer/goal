@@ -43,7 +43,7 @@ fn print_backtrace_skipping_top_frames_linux(skipframes int) bool {
 	$if no_backtrace ? {
 		return false
 	} $else {
-		$if linux && !freestanding {
+		$if linux {
 				buffer := [100]voidptr{}
 				nr_ptrs := C.backtrace(&buffer[0], 100)
 				if nr_ptrs < 2 {

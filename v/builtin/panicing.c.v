@@ -10,9 +10,6 @@ fn panic_debug(line_no int, file string, mod string, fn_name string, s string) {
 	// module is less likely to change than function, etc...
 	// During edits, the line number will change most frequently,
 	// so it is last
-	$if freestanding {
-		bare_panic(s)
-	} $else {
 		// vfmt off
 		// Note: be carefull to not allocate here, avoid string interpolation
 		flush_stdout()
@@ -43,7 +40,6 @@ fn panic_debug(line_no int, file string, mod string, fn_name string, s string) {
 			}
 			C.exit(1)
 		}
-	}
 	C.exit(1)
 }
 
@@ -66,9 +62,6 @@ pub fn panic_result_not_set(s string) {
 @[noreturn]
 pub fn panic(s string) {
 	// Note: be careful to not use string interpolation here:
-	$if freestanding {
-		bare_panic(s)
-	} $else {
 		// vfmt off
 		flush_stdout()
 		eprint('V panic: ')
@@ -94,16 +87,12 @@ pub fn panic(s string) {
 			}
 			C.exit(1)
 		}
-	}
 	C.exit(1)
 }
 
 // return a C-API error message matching to `errnum`
 pub fn c_error_number_str(errnum int) string {
 	mut err_msg := ''
-	$if freestanding {
-		err_msg = 'error ' + errnum.str()
-	} $else {
 		$if !vinix {
 			c_msg := C.strerror(errnum)
 			err_msg = string{
@@ -112,7 +101,6 @@ pub fn c_error_number_str(errnum int) string {
 				is_lit: 1
 			}
 		}
-	}
 	return err_msg
 }
 

@@ -772,10 +772,6 @@ fn (mut g Gen) gen_array_sort(node ast.CallExpr) {
 		// println(rec_sym.kind)
 		verror('.sort() is an array method or a fixed array method')
 	}
-	if g.pref.is_bare {
-		g.writeln('bare_panic(_S("sort does not work with -freestanding"))')
-		return
-	}
 	left_is_array := rec_sym.kind == .array
 	elem_type := if left_is_array {
 		(rec_sym.info as ast.Array).elem_type

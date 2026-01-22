@@ -10,13 +10,6 @@ pub fn eprintln(s string) {
 		C.fprintf(C.stderr, c'%.*s\n', s.len, s.str)
 		return
 	}
-	$if freestanding {
-		// flushing is only a thing with C.FILE from stdio.h, not on the syscall level
-		bare_eprint(s.str, u64(s.len))
-		bare_eprint(c'\n', 1)
-	} $else $if ios {
-		C.WrappedNSLog(s.str)
-	} $else {
 		flush_stdout()
 		flush_stderr()
 		// eprintln is used in panics, so it should not fail at all
@@ -25,7 +18,6 @@ pub fn eprintln(s string) {
 		}
 		_writeln_to_fd(2, s)
 		flush_stderr()
-	}
 }
 
 // eprint prints a message to stderr. Both stderr and stdout are flushed.
@@ -38,13 +30,6 @@ pub fn eprint(s string) {
 		C.fprintf(C.stderr, c'%.*s', s.len, s.str)
 		return
 	}
-	$if freestanding {
-		// flushing is only a thing with C.FILE from stdio.h, not on the syscall level
-		bare_eprint(s.str, u64(s.len))
-	} $else $if ios {
-		// TODO: Implement a buffer as NSLog doesn't have a "print"
-		C.WrappedNSLog(s.str)
-	} $else {
 		flush_stdout()
 		flush_stderr()
 		$if android && !termux {
@@ -52,25 +37,14 @@ pub fn eprint(s string) {
 		}
 		_write_buf_to_fd(2, s.str, s.len)
 		flush_stderr()
-	}
 }
 
 pub fn flush_stdout() {
-	$if freestanding {
-		not_implemented := 'flush_stdout is not implemented\n'
-		bare_eprint(not_implemented.str, u64(not_implemented.len))
-	} $else {
 		C.fflush(C.stdout)
-	}
 }
 
 pub fn flush_stderr() {
-	$if freestanding {
-		not_implemented := 'flush_stderr is not implemented\n'
-		bare_eprint(not_implemented.str, u64(not_implemented.len))
-	} $else {
 		C.fflush(C.stderr)
-	}
 }
 
 // unbuffer_stdout will turn off the default buffering done for stdout.
@@ -89,12 +63,7 @@ pub fn flush_stderr() {
 // See https://www.gnu.org/software/libc/manual/html_node/Buffering-Concepts.html .
 // See https://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_05 .
 pub fn unbuffer_stdout() {
-	$if freestanding {
-		not_implemented := 'unbuffer_stdout is not implemented\n'
-		bare_eprint(not_implemented.str, u64(not_implemented.len))
-	} $else {
 		unsafe { C.setbuf(C.stdout, 0) }
-	}
 }
 
 // print prints a message to stdout. Note that unlike `eprint`, stdout is not automatically flushed.
@@ -104,16 +73,7 @@ pub fn print(s string) {
 		C.fprintf(C.stdout, c'%.*s', s.len, s.str)
 		return
 	}
-	$if android && !termux {
-		C.android_print(C.stdout, c'%.*s\n', s.len, s.str)
-	} $else $if ios {
-		// TODO: Implement a buffer as NSLog doesn't have a "print"
-		C.WrappedNSLog(s.str)
-	} $else $if freestanding {
-		bare_print(s.str, u64(s.len))
-	} $else {
 		_write_buf_to_fd(1, s.str, s.len)
-	}
 }
 
 // println prints a message with a line end, to stdout. Note that unlike `eprintln`, stdout is not automatically flushed.
@@ -130,19 +90,7 @@ pub fn println(s string) {
 		C.fprintf(C.stdout, c'%.*s\n', s.len, s.str)
 		return
 	}
-	$if android && !termux {
-		C.android_print(C.stdout, c'%.*s\n', s.len, s.str)
-		return
-	} $else $if ios {
-		C.WrappedNSLog(s.str)
-		return
-	} $else $if freestanding {
-		bare_print(s.str, u64(s.len))
-		bare_print(c'\n', 1)
-		return
-	} $else {
 		_writeln_to_fd(1, s)
-	}
 }
 
 @[manualfree]
@@ -171,7 +119,7 @@ fn _write_buf_to_fd(fd int, buf &u8, buf_len int) {
 	mut ptr := unsafe { buf }
 	mut remaining_bytes := isize(buf_len)
 	mut x := isize(0)
-	$if freestanding || vinix || builtin_write_buf_to_fd_should_use_c_write ? {
+	$if vinix || builtin_write_buf_to_fd_should_use_c_write ? {
 		unsafe {
 			for remaining_bytes > 0 {
 				x = C.write(fd, ptr, remaining_bytes)

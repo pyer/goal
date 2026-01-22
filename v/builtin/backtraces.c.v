@@ -8,9 +8,7 @@ pub fn print_backtrace() {
 	// * the rest of the backtrace frames
 	// => top 2 frames should be skipped, since they will not be informative to the developer
 	$if !no_backtrace ? {
-		$if freestanding {
-			println(bare_backtrace())
-		} $else $if use_libbacktrace ? {
+		$if use_libbacktrace ? {
 			// NOTE: TCC doesn't have the unwind library
 			print_libbacktrace(1)
 		} $else {

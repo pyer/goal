@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Build"
-v -path ./lib -prod -gc none -o v1 v.v
+v -path ".|lib" -prod -gc none -o v1 v.v
 echo "Test"
 ./v1 v.v
 ./v

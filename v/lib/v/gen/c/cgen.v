@@ -693,11 +693,7 @@ pub fn (mut g Gen) init() {
 		if !g.pref.skip_unused || g.table.used_features.used_maps > 0 {
 			g.cheaders.writeln(c_mapfn_callback_types)
 		}
-		if g.pref.is_bare {
-			g.cheaders.writeln(c_bare_headers)
-		} else {
-			g.cheaders.writeln(c_headers)
-		}
+		g.cheaders.writeln(c_headers)
 		if !g.pref.skip_unused || g.table.used_features.safe_int {
 			g.cheaders.writeln(c_unsigned_comparison_functions)
 		}
@@ -3807,7 +3803,7 @@ fn (mut g Gen) char_literal(node ast.CharLiteral) {
 	}
 	// TODO: optimize use L-char instead of u32 when possible
 	if !node.val.is_pure_ascii() {
-		g.write('((rune)0x${node.val.utf32_code().hex()} /* `${node.val}` */)')
+		//g.write('((rune)0x${node.val.utf32_code().hex()} /* `${node.val}` */)')
 		return
 	}
 	if node.val.len == 1 {
@@ -6313,12 +6309,6 @@ fn (mut g Gen) write_init_function() {
 		}
 	}
 
-	if g.pref.is_bare {
-		if _ := g.table.fns['init_global_allocator'] {
-			g.writeln('builtin__init_global_allocator();')
-		}
-	}
-
 	if g.pref.prealloc {
 		if _ := g.table.fns['prealloc_vinit'] {
 			g.writeln('builtin__prealloc_vinit();')
@@ -6519,7 +6509,7 @@ fn (mut g Gen) write_types(symbols []&ast.TypeSymbol) {
 				}
 			}
 			ast.Thread {
-				if !g.pref.is_bare && !g.pref.no_builtin
+				if !g.pref.no_builtin
 					&& (!g.pref.skip_unused || sym.idx in g.table.used_features.used_syms) {
 					if g.pref.os == .windows {
 						if name == '__v_thread' {
