@@ -89,7 +89,7 @@ pub mut:
 	ldflags      []string // `-labcd' from `v -ldflags "-labcd"`
 }
 
-fn ccompiler_options(ccompiler string, out_name_c string, pref_ &pref.Preferences) CcompilerOptions {
+fn ccompiler_options(ccompiler string, pref_ &pref.Preferences) CcompilerOptions {
 	mut ccoptions := CcompilerOptions{}
 
 	mut debug_options := ['-g']
@@ -173,7 +173,7 @@ fn ccompiler_options(ccompiler string, out_name_c string, pref_ &pref.Preference
 	ccoptions.wargs << '-Werror=implicit-function-declaration'
 
 	// The C file we are compiling
-	ccoptions.source_args << os.quoted_path(out_name_c)
+	ccoptions.source_args << os.quoted_path(pref_.target_c)
   /*
 	cflags := get_os_cflags()
 
@@ -252,61 +252,19 @@ fn error_context_lines(text string, keyword string, before int, after int) []str
 }
 
 
-pub fn cc(out_name_c string, pref_ &pref.Preferences) {
+pub fn cc(pref_ &pref.Preferences) {
   ccompiler := 'gcc'
-
-	rpath := os.real_path(pref_.path).trim_space()
-	out_name := rpath.all_before_last('.')
-		// Do *NOT* be tempted to generate binaries in the current work folder,
-		// when -o is not given by default, like Go, Clang, GCC etc do.
-		//
-		// These compilers also are frequently used with an external build system,
-		// in part because of that shortcoming, to ensure that they work in a
-		// predictable work folder/environment.
-		//
-		// In comparison, with V, building an executable by default places it
-		// next to its source code, so that it can be used directly with
-		// functions like `os.resource_abs_path()` and `os.executable()` to
-		// locate resources relative to it. That enables running examples like
-		// this:
-		// `./v run examples/flappylearning/`
-		// instead of:
-		// `./v -o examples/flappylearning/flappylearning run examples/flappylearning/`
-		// This topic comes up periodically from time to time on Discord, and
-		// many CI breakages already happened, when someone decides to make V
-		// behave in this aspect similarly to the dumb behaviour of other
-		// compilers.
-		//
-		// If you do decide to break it, please *at the very least*, test it
-		// extensively, and make a PR about it, instead of committing directly
-		// and breaking the CI, VC, and users doing `v up`.
-
-	if pref_.is_verbose {
-		println('builder.cc() out_name=${os.quoted_path(out_name)}')
-	}
-	if pref_.only_check_syntax {
-		if pref_.is_verbose {
-			println('builder.cc returning early, since pref_.only_check_syntax is true')
-		}
-		return
-	}
-	if pref_.check_only {
-		if pref_.is_verbose {
-			println('builder.cc returning early, since pref_.check_only is true')
-		}
-		return
-	}
 
 	mut tried_compilation_commands := []string{}
 	original_pwd := os.getwd()
 
 		// try to compile with the chosen compiler
 		// if compilation fails, retry again with another
-		mut ccoptions := ccompiler_options(ccompiler, out_name_c, pref_)
-	  if os.is_dir(out_name) {
-		  verror('${os.quoted_path(out_name)} is a directory')
+		mut ccoptions := ccompiler_options(ccompiler, pref_)
+	  if os.is_dir(pref_.target) {
+		  verror('${os.quoted_path(pref_.target)} is a directory')
 	  }
-	  ccoptions.o_args << '-o ${os.quoted_path(out_name)}'
+	  ccoptions.o_args << '-o ${os.quoted_path(pref_.target)}'
 
 		if pref_.build_mode == .build_module {
 			ccoptions.pre_args << '-c'
@@ -349,7 +307,7 @@ pub fn cc(out_name_c string, pref_ &pref.Preferences) {
 		}
 
   if !pref_.keepc {
-    os.rm(out_name_c) or {}
+    os.rm(pref_.target_c) or {}
   }
 }
 

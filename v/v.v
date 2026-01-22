@@ -15,7 +15,7 @@ import v.callgraph
 import v.gen.c
 import v.compiler
 
-const v_version = '1.0.1'
+const v_version = '1.0.2'
 
 fn show_help() {
   println('Usage: v main.v')
@@ -43,6 +43,8 @@ fn main() {
     show_version()
     return
   }
+
+  println('Building ${prefs.path} => ${prefs.target_c} => ${prefs.target}')
 
   // Construct the V object from command line arguments
   println('Get builtin and user files')
@@ -92,12 +94,17 @@ fn main() {
   }
 
   // Generate C source
-  out_name_c := prefs.path[..prefs.path.len - 1] + 'c'
-  source := c.gen(parsed_files, mut table, prefs)
-  os.write_file_array(out_name_c, source) or { panic(err) }
+  source := c.gen(mut table, prefs, parsed_files)
+  os.write_file_array(prefs.target_c, source) or { panic(err) }
 
   // Compile C source
-  compiler.cc(out_name_c, prefs)
+  compiler.cc(prefs)
 
   util.free_caches()
+  /*
+  if prefs.is_test {
+    os.execute(prefs.target)
+    os.rm(prefs.target)
+  }
+  */
 }

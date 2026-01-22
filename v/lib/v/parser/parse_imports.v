@@ -160,8 +160,6 @@ pub fn parse_imports(mut all_parsed_files []&ast.File, mut table ast.Table, pref
 				break
 			}
 			v_files := v_files_from_dir(import_path)
-//			raw_files := v_files_from_dir(import_path)
-//	    v_files := pref_.should_compile_filtered_files(import_path, raw_files)
 			if v_files.len == 0 {
 				// v.parsers[i].error_with_token_index('cannot import module "$mod" (no .v files in "$import_path")', v.parsers[i].import_ast.get_import_tok_idx(mod))
 				all_parsed_files[i].errors << error_with_pos('cannot import module "${mod}" (no .v files in "${import_path}")', ast_file.path, imp.pos)

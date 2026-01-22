@@ -26,9 +26,7 @@ pub fn (mut p Preferences) fill_with_defaults() {
 	p.vlib     = os.join_path(p.vroot, 'lib')
 	p.vmodules = os.join_path(p.vroot, 'modules')
 	p.lookup_path = [ p.vlib, p.vmodules ]
-  //println(p.lookup_path)
 
-  println(p.path)
   if p.path.starts_with('.') {
     eprintln('Bad file name, cannot start with .')
     exit(1)

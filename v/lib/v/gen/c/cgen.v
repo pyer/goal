@@ -275,7 +275,7 @@ mut:
 }
 
 
-pub fn gen(files []&ast.File, mut table ast.Table, pref_ &pref.Preferences) strings.Builder {
+pub fn gen(mut table ast.Table, pref_ &pref.Preferences, files []&ast.File) strings.Builder {
   // Generate C source
 	util.timing_start('C GEN')
 	mut module_built := ''
