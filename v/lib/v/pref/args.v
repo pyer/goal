@@ -52,9 +52,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 			'-show-asserts' {
 				res.show_asserts = true
 			}
-			'-check-syntax' {
-				res.only_check_syntax = true
-			}
 			'-check' {
 				res.check_only = true
 			}
@@ -147,11 +144,8 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 			'-keepc' {
 				res.keepc = true
 			}
-			'-showcc' {
-				res.show_cc = true
-			}
-			'-show-c-output' {
-				res.show_c_output = true
+			'-run' {
+				res.is_run = true
 			}
 			'-show-callgraph' {
 				res.show_callgraph = true
@@ -224,9 +218,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 				res.line_info = cmdline.option(args[i..], arg, '')
 				res.parse_line_info(res.line_info)
 				i++
-			}
-			'-check-unused-fn-args' {
-				res.show_unused_params = true
 			}
 			'-check-return' {
 				res.is_check_return = true

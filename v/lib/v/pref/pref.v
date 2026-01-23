@@ -57,10 +57,11 @@ pub mut:
 	build_mode          BuildMode
 	output_mode         OutputMode = .stdout
 	// verbosity           VerboseLevel
-	is_verbose bool
+	is_verbose         bool
 	is_test            bool   // `v test string_test.v`
 	is_prod            bool   // use "-O3"
 	no_prod_options    bool   // `-no-prod-options`, means do not pass any optimization flags to the C compilation, while still allowing the user to use for example `-cflags -Os` to pass custom ones
+  is_run             bool // run the executable after compilation
 	is_repl            bool
 	is_debug           bool // turned on by -g/-debug or -cg/-cdebug, it tells v to pass -g to the C backend compiler.
 	show_asserts       bool // `VTEST_SHOW_ASSERTS=1 v file_test.v` will show details about the asserts done by a test file. Also activated for `-stats` and `-show-asserts`.
@@ -81,11 +82,8 @@ pub mut:
 	translated         bool     // `v translate doom.v` are we running V code translated from C? allow globals, ++ expressions, etc
 	hide_auto_str      bool // `v -hide-auto-str program.v`, doesn't generate str() with struct data
 	sanitize               bool // use Clang's new "-fsanitize" option
-	show_cc                bool   // -showcc, print cc command
-	show_c_output          bool   // -show-c-output, print all cc output even if the code was compiled correctly
 	show_callgraph         bool   // -show-callgraph, print the program callgraph, in a Graphviz DOT format to stdout
 	show_depgraph          bool   // -show-depgraph, print the program module dependency graph, in a Graphviz DOT format to stdout
-	show_unused_params     bool   // NOTE: temporary until making it a default.
 	use_os_system_to_run   bool // when set, use os.system() to run the produced executable, instead of os.new_process; works around segfaults on macos, that may happen when xcode is updated
 	// TODO: Convert this into a []string
 	cflags  string // Additional options which will be passed to the C compiler *before* other options.
@@ -136,8 +134,7 @@ pub mut:
 	notes_are_errors bool // -N, treat *every* notice as an error
 	fatal_errors     bool // unconditionally exit after the first error with exit(1)
 
-	only_check_syntax bool // when true, just parse the files, then stop, before running checker
-	check_only        bool // same as only_check_syntax, but also runs the checker
+	check_only        bool // when true, just parse the files and run the checker
 	experimental      bool // enable experimental features
 	skip_unused       bool // skip generating C code for functions, that are not used
 

@@ -94,17 +94,22 @@ fn main() {
   }
 
   // Generate C source
+  println('Generate ${prefs.target_c}')
   source := c.gen(mut table, prefs, parsed_files)
   os.write_file_array(prefs.target_c, source) or { panic(err) }
 
   // Compile C source
+  println('Compile ${prefs.target_c} to ${prefs.target}')
   compiler.cc(prefs)
 
   util.free_caches()
-  /*
-  if prefs.is_test {
-    os.execute(prefs.target)
-    os.rm(prefs.target)
+  if prefs.is_run {
+    mut cmd := prefs.target
+    println("Execute ${cmd}")
+    if !prefs.target.starts_with('/') {
+      cmd = "./" + prefs.target
+    }
+    result := os.execute(cmd)
+    println(result.output)
   }
-  */
 }

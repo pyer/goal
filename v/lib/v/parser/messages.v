@@ -87,7 +87,7 @@ fn (mut p Parser) error_with_pos(s string, pos token.Pos) ast.NodeError {
 
 		// To avoid getting stuck after an error, the parser
 		// will proceed to the next token.
-		if p.pref.check_only || p.pref.only_check_syntax {
+		if p.pref.check_only {
 			if p.tok.kind != .eof {
 				p.next()
 			}

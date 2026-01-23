@@ -249,8 +249,6 @@ fn error_context_lines(text string, keyword string, before int, after int) []str
 pub fn cc(pref_ &pref.Preferences) {
   ccompiler := 'gcc'
 
-	mut tried_compilation_commands := []string{}
-	original_pwd := os.getwd()
 
 		// try to compile with the chosen compiler
 		// if compilation fails, retry again with another
@@ -271,37 +269,26 @@ pub fn cc(pref_ &pref.Preferences) {
 		str_args := all_args.join(' ').replace('\n', ' ')
 		mut cmd := '${os.quoted_path(ccompiler)} ${str_args}'
 
+	  //original_pwd := os.getwd()
 		//os.chdir(vdir) or {}
-		tried_compilation_commands << cmd
-  	if pref_.is_verbose || pref_.show_cc {
-	  	println('> C compiler cmd: ${cmd}')
-	  }
 
+		// Print the C command
+		println(cmd)
 		// Run
-		ccompiler_label := 'C gcc'
-		util.timing_start(ccompiler_label)
 		res := os.execute(cmd)
-		util.timing_measure(ccompiler_label)
-		if pref_.show_c_output {
+		if res.exit_code != 0 {
+				verror('C compiler error, while attempting to run: \n' +
+               '${cmd}\n' +
+               'Error: ${res.exit_code}\n')
+		}
+		if pref_.is_verbose {
 			show_c_compiler_output(ccompiler, res)
 		}
-		os.chdir(original_pwd) or {}
-		if res.exit_code == 127 {
-				verror('C compiler error, while attempting to run: \n' +
-					'-----------------------------------------------------------\n' + '${cmd}\n' +
-					'-----------------------------------------------------------\n' +
-					'Probably your C compiler is missing. \n' +
-					'Please reinstall it, or make it available in your PATH.\n\n')
-		}
 		post_process_c_compiler_output(ccompiler, res, pref_)
-		// Print the C command
-		if pref_.is_verbose {
-			println('${ccompiler}')
-			println('=========\n')
-		}
+		//os.chdir(original_pwd) or {}
 
-  if !pref_.keepc {
-    os.rm(pref_.target_c) or {}
-  }
+    if !pref_.keepc {
+      os.rm(pref_.target_c) or {}
+    }
 }
 
