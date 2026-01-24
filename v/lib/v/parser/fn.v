@@ -565,13 +565,11 @@ fn (mut p Parser) fn_decl() ast.FnDecl {
 				}
 			}
 		}
-		if !p.pref.is_fmt {
-			if p.is_imported_symbol(name) {
+		if p.is_imported_symbol(name) {
 				p.error_with_pos('cannot redefine imported function `${name}`', name_pos)
 				return ast.FnDecl{
 					scope: unsafe { nil }
 				}
-			}
 		}
 	} else if p.tok.kind in [.plus, .minus, .mul, .div, .mod, .lt, .eq] && p.peek_tok.kind == .lpar {
 		name = p.tok.kind.str() // op_to_fn_name()
@@ -726,7 +724,7 @@ run them via `v file.v` instead',
 		// we could also check if kind is .array,  .array_fixed, .map instead of mod.len
 		mut is_non_local := type_sym.mod.len > 0 && type_sym.mod != p.mod && type_sym.language == .v
 		// check maps & arrays, must be defined in same module as the elem type
-		if !is_non_local && !(p.builtin_mod && p.pref.is_fmt) && type_sym.kind in [.array, .map] {
+		if !is_non_local && type_sym.kind in [.array, .map] {
 			elem_type_sym := p.table.sym(p.table.value_type(rec.typ))
 			is_non_local = elem_type_sym.mod.len > 0 && elem_type_sym.mod != p.mod
 				&& elem_type_sym.language == .v
@@ -781,9 +779,7 @@ run them via `v file.v` instead',
 				if existing.name != '' {
 					if file_mode == .v && existing.file_mode != .v {
 						// a definition made in a .c.v file, should have a priority over a .v file definition of the same function
-						if !p.pref.is_fmt {
-							name = p.prepend_mod('pure_v_but_overridden_by_${existing.file_mode}_${short_fn_name}')
-						}
+						name = p.prepend_mod('pure_v_but_overridden_by_${existing.file_mode}_${short_fn_name}')
 					} else if !p.pref.translated {
 						p.table.redefined_fns << name
 					}
@@ -1306,10 +1302,8 @@ fn (mut p Parser) fn_params() ([]ast.Param, bool, bool, bool) {
 			mut type_pos := [p.tok.pos()]
 			// `a, b, c int`
 			for p.tok.kind == .comma {
-				if !p.pref.is_fmt {
-					p.error('`fn f(x, y Type)` syntax has been deprecated. ' +
+				p.error('`fn f(x, y Type)` syntax has been deprecated. ' +
 						'Use `fn f(x Type, y Type)` instead. You can run `v fmt -w "${p.scanner.file_path}"` to automatically fix your code.')
-				}
 				p.next()
 				param_pos << p.tok.pos()
 				param_names << p.check_name()
@@ -1317,9 +1311,7 @@ fn (mut p Parser) fn_params() ([]ast.Param, bool, bool, bool) {
 			}
 			if p.tok.kind == .key_mut {
 				// TODO: remove old syntax
-				if !p.pref.is_fmt {
-					p.warn_with_pos('use `mut f Foo` instead of `f mut Foo`', p.tok.pos())
-				}
+				p.warn_with_pos('use `mut f Foo` instead of `f mut Foo`', p.tok.pos())
 				is_mut = true
 			}
 			if p.tok.kind == .key_shared {

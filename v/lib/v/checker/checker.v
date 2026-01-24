@@ -330,7 +330,7 @@ pub fn (mut c Checker) reorder_fns_at_the_end(mut ast_file ast.File) {
 }
 
 pub fn (mut c Checker) check_scope_vars(sc &ast.Scope) {
-	if !c.pref.is_repl && !c.file.is_test {
+	if !c.file.is_test {
 		for _, obj in sc.objects {
 			match obj {
 				ast.Var {
@@ -2422,7 +2422,7 @@ fn (mut c Checker) stmt(mut node ast.Stmt) {
 				}
 				else {}
 			}
-			if !c.pref.is_repl && (c.stmt_level == 1 || (c.stmt_level > 1 && !c.is_last_stmt)) {
+			if c.stmt_level == 1 || (c.stmt_level > 1 && !c.is_last_stmt) {
 				if mut node.expr is ast.InfixExpr {
 					if node.expr.op == .left_shift {
 						left_sym := c.table.final_sym(node.expr.left_type)

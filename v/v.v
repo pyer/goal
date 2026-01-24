@@ -31,7 +31,8 @@ fn main() {
   args := os.args[1..]
 
   if args.len == 0 {
-    println(v_version)
+    show_version()
+    show_help()
     return
   }
   prefs := pref.parse_args_and_show_errors()
@@ -58,7 +59,6 @@ fn main() {
   // Parse files
   //parsed_files []&ast.File
   mut table := ast.new_table()
-  table.is_fmt = false
   table.pointer_size = if prefs.m64 { 8 } else { 4 }
 
   println('Parse files')

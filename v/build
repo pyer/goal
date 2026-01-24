@@ -4,7 +4,5 @@ v -path ".|lib" -prod -gc none -o v1 v.v
 echo "Test"
 ./v1 v.v
 ./v
-rm -f v1 hello
-./v hello.v
-./hello
+./v -run hello
 rm -f hello

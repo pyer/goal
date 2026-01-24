@@ -327,18 +327,6 @@ fn (mut p Parser) comptime_call() ast.ComptimeCall {
 			path += '.html'
 		}
 		if !os.exists(path) {
-			if p.pref.is_fmt {
-				return ast.ComptimeCall{
-					scope:       unsafe { nil }
-					is_vweb:     true
-					is_veb:      is_veb
-					method_name: method_name
-					kind:        if is_html { .html } else { .tmpl }
-					args_var:    literal_string_param
-					args:        [arg]
-					pos:         start_pos.extend(p.prev_tok.pos())
-				}
-			}
 			if is_html {
 				p.error_with_pos('veb HTML template "${tmpl_path}" not found', arg_pos)
 			} else {

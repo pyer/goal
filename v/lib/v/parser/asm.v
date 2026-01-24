@@ -40,7 +40,7 @@ fn (mut p Parser) asm_stmt(is_top_level bool) ast.AsmStmt {
 		is_goto = true
 		p.next()
 	}
-	if arch == ._auto && !p.pref.is_fmt {
+	if arch == ._auto {
 		if p.tok.lit == '' {
 			p.error('missing assembly architecture. Try i386, amd64, arm64, or wasm.')
 		}

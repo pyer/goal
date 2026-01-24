@@ -130,11 +130,9 @@ fn (mut p Parser) array_init(is_option bool, alias_array_type ast.Type) ast.Arra
 			}
 		}
 		if exprs.len == 0 && p.tok.kind != .lcbr && has_type {
-			if !p.pref.is_fmt {
 				modifier := if is_option { '?' } else { '' }
 				p.warn_with_pos('use `x := ${modifier}[]Type{}` instead of `x := ${modifier}[]Type`',
 					first_pos.extend(last_pos))
-			}
 		}
 	} else {
 		array_type = (p.table.sym(alias_array_type).info as ast.Alias).parent_type

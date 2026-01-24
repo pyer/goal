@@ -61,7 +61,7 @@ fn (mut p Parser) if_expr(is_comptime bool, is_expr bool) ast.IfExpr {
 						is_special:   true
 					})
 				}
-				if is_comptime && comptime_has_true_branch && !p.pref.is_fmt {
+				if is_comptime && comptime_has_true_branch {
 					p.skip_scope()
 					branches << ast.IfBranch{
 						pos:      start_pos.extend(end_pos)
@@ -193,7 +193,7 @@ fn (mut p Parser) if_expr(is_comptime bool, is_expr bool) ast.IfExpr {
 		}
 		p.open_scope()
 		if is_comptime && comptime_skip_curr_stmts
-			&& p.is_in_top_level_comptime(p.inside_assign_rhs) && !p.pref.is_fmt {
+			&& p.is_in_top_level_comptime(p.inside_assign_rhs) {
 			p.skip_scope()
 			branches << ast.IfBranch{
 				cond:     cond
@@ -361,15 +361,6 @@ fn (mut p Parser) match_expr(is_comptime bool) ast.MatchExpr {
 					break
 				}
 				p.check(.comma)
-				if p.pref.is_fmt {
-					if p.tok.kind == .lcbr {
-						break
-					}
-					for p.tok.kind == .comma {
-						p.next()
-					}
-					ecmnts << p.eat_comments()
-				}
 			}
 			is_sum_type = true
 		} else {
@@ -435,15 +426,6 @@ fn (mut p Parser) match_expr(is_comptime bool) ast.MatchExpr {
 				}
 
 				p.check(.comma)
-				if p.pref.is_fmt {
-					if p.tok.kind == .lcbr {
-						break
-					}
-					for p.tok.kind == .comma {
-						p.next()
-					}
-					ecmnts << p.eat_comments()
-				}
 			}
 		}
 		branch_last_pos := p.prev_tok.pos()
@@ -456,7 +438,7 @@ fn (mut p Parser) match_expr(is_comptime bool) ast.MatchExpr {
 		mut stmts := []ast.Stmt{}
 		if is_comptime && ((!is_else && comptime_skip_curr_stmts)
 			|| (is_else && comptime_has_true_branch))
-			&& p.is_in_top_level_comptime(p.inside_assign_rhs) && !p.pref.is_fmt {
+			&& p.is_in_top_level_comptime(p.inside_assign_rhs) {
 			p.skip_scope()
 		} else {
 			stmts = p.parse_block_no_scope(false)

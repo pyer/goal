@@ -53,9 +53,7 @@ fn (mut p Parser) check_expr(precedence int) !ast.Expr {
 	mut node := ast.empty_expr
 	is_stmt_ident := p.is_stmt_ident
 	p.is_stmt_ident = false
-	if !p.pref.is_fmt {
-		p.eat_comments()
-	}
+	p.eat_comments()
 	if p.inside_if_cond {
 		p.if_cond_comments << p.eat_comments()
 	}
@@ -161,7 +159,7 @@ fn (mut p Parser) check_expr(precedence int) !ast.Expr {
 			if p.peek_tok.kind in [.lpar, .lsbr] && p.peek_tok.is_next_to(p.tok) {
 				node = p.call_expr(p.language, p.mod)
 			} else {
-				if (p.pref.use_coroutines || p.pref.is_fmt) && p.tok.kind == .key_go {
+				if (p.pref.use_coroutines) && p.tok.kind == .key_go {
 					mut go_expr := p.go_expr()
 					go_expr.is_expr = true
 					node = go_expr
@@ -566,10 +564,6 @@ fn (mut p Parser) check_expr(precedence int) !ast.Expr {
 	if p.inside_if_cond {
 		p.if_cond_comments << p.eat_comments()
 	}
-	if p.pref.is_fmt && p.tok.kind == .comment && p.peek_tok.kind.is_infix() && !p.inside_map_init
-		&& !(p.peek_tok.kind == .mul && p.peek_tok.pos().line_nr != p.tok.pos().line_nr) {
-		p.left_comments = p.eat_comments()
-	}
 	return p.expr_with_left(node, precedence, is_stmt_ident)
 }
 
@@ -790,10 +784,6 @@ fn (mut p Parser) infix_expr(left ast.Expr) ast.Expr {
 		p.if_cond_comments << p.eat_comments()
 	}
 	mut before_op_comments := []ast.Comment{}
-	if p.pref.is_fmt && p.left_comments.len > 0 {
-		before_op_comments = p.left_comments.clone()
-		p.left_comments = []
-	}
 	p.left_comments = []
 	after_op_comments := p.eat_comments()
 	mut right := ast.empty_expr

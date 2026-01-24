@@ -168,28 +168,6 @@ fn ccompiler_options(ccompiler string, pref_ &pref.Preferences) CcompilerOptions
 
 	// The C file we are compiling
 	ccoptions.source_args << os.quoted_path(pref_.target_c)
-  /*
-	cflags := get_os_cflags()
-
-	if pref_.build_mode != .build_module {
-		only_o_files := cflags.c_options_only_object_files()
-		ccoptions.o_args << only_o_files
-	}
-
-	defines, others, libs := cflags.defines_others_libs()
-	ccoptions.pre_args << defines
-	ccoptions.pre_args << others
-	ccoptions.linker_flags << libs
-	// Without these libs compilation will fail on Linux
-	if pref_.build_mode != .build_module
-		&& pref_.os in [.linux, .freebsd, .openbsd, .netbsd, .dragonfly, .solaris, .haiku] {
-		if pref_.os in [.freebsd, .netbsd] {
-			// Free/NetBSD: backtrace needs execinfo library while linking, also execinfo depends on elf.
-			ccoptions.linker_flags << '-lexecinfo'
-			ccoptions.linker_flags << '-lelf'
-		}
-	}
-  */
 	ccoptions.source_args << ['-std=${c_std}', '-D_DEFAULT_SOURCE']
 	$if trace_ccoptions ? {
 		println('>>> setup_ccompiler_options ccoptions: ${ccoptions}')

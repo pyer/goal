@@ -77,12 +77,6 @@ fn (mut p Parser) register_implied_import(alias string) {
 }
 
 fn (mut p Parser) check_unused_imports() {
-	if p.pref.is_repl || p.pref.is_fmt {
-		// The REPL should be much more liberal, and should not warn about
-		// unused imports, because they probably will be in the next few lines...
-		// vfmt doesn't care about unused imports either
-		return
-	}
 	for import_m in p.ast_imports {
 		alias := import_m.alias
 		mod := import_m.mod

@@ -17,34 +17,10 @@ pub enum AssertFailureMode {
 	continues
 }
 
-pub enum GarbageCollectionMode {
-	unknown
-	no_gc
-	boehm_full     // full garbage collection mode
-	boehm_incr     // incremental garbage collection mode
-	boehm_full_opt // full garbage collection mode
-	boehm_incr_opt // incremental garbage collection mode
-	boehm_leak     // leak detection mode (makes `gc_check_leaks()` work)
-}
-
-pub enum OutputMode {
-	stdout
-	silent
-}
-
 pub enum ColorOutput {
 	auto
 	always
 	never
-}
-
-pub enum CompilerType {
-	gcc
-	tinyc
-	clang
-	emcc
-	mingw
-	cplusplus
 }
 
 pub const supported_test_runners = ['normal', 'simple', 'tap', 'dump', 'teamcity']
@@ -55,21 +31,17 @@ pub mut:
 	arch                Arch
 	os                  OS // the OS to compile for
 	build_mode          BuildMode
-	output_mode         OutputMode = .stdout
 	// verbosity           VerboseLevel
 	is_verbose         bool
 	is_test            bool   // `v test string_test.v`
 	is_prod            bool   // use "-O3"
 	no_prod_options    bool   // `-no-prod-options`, means do not pass any optimization flags to the C compilation, while still allowing the user to use for example `-cflags -Os` to pass custom ones
   is_run             bool // run the executable after compilation
-	is_repl            bool
 	is_debug           bool // turned on by -g/-debug or -cg/-cdebug, it tells v to pass -g to the C backend compiler.
 	show_asserts       bool // `VTEST_SHOW_ASSERTS=1 v file_test.v` will show details about the asserts done by a test file. Also activated for `-stats` and `-show-asserts`.
 	show_timings       bool // show how much time each compiler stage took
 	show_version       bool // -v, -V, -version or --version was passed
 	show_help          bool // -?, -h, -help or --help was passed
-	is_fmt             bool
-	is_vet             bool
 	is_vweb            bool // skip _ var warning in templates
 	is_apk             bool     // build as Android .apk format
 	is_cstrict         bool     // turn on more C warnings; slightly slower

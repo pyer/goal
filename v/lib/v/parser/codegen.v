@@ -15,7 +15,7 @@ pub fn (mut p Parser) codegen(code string) {
 }
 
 fn (mut p Parser) handle_codegen_for_file() {
-	if p.pref.is_fmt || p.codegen_text == '' {
+	if p.codegen_text == '' {
 		return
 	}
 	ptext := 'module ' + p.mod.all_after_last('.') + '\n' + p.codegen_text

@@ -233,10 +233,8 @@ fn (mut p Parser) enum_decl() ast.EnumDecl {
 		is_pub: is_pub
 	})
 
-	if idx in [ast.string_type_idx, ast.rune_type_idx, ast.array_type_idx, ast.map_type_idx]
-		&& !p.pref.is_fmt {
-		p.error_with_pos('cannot register enum `${name}`, another type with this name exists',
-			end_pos)
+	if idx in [ast.string_type_idx, ast.rune_type_idx, ast.array_type_idx, ast.map_type_idx] {
+		p.error_with_pos('cannot register enum `${name}`, another type with this name exists', end_pos)
 	}
 
 	if idx == ast.invalid_type_idx {

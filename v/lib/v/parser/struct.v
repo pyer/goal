@@ -478,7 +478,7 @@ fn (mut p Parser) struct_decl(is_anon bool) ast.StructDecl {
 		}
 	}
 	// allow duplicate c struct declarations
-	if ret == -1 && language != .c && !p.pref.is_fmt {
+	if ret == -1 && language != .c {
 		p.error_with_pos('cannot register struct `${name}`, another type with this name exists',
 			name_pos)
 		return ast.StructDecl{}
@@ -755,7 +755,7 @@ fn (mut p Parser) interface_decl() ast.InterfaceDecl {
 		}
 		language: language
 	)
-	if reg_idx == -1 && !p.pref.is_fmt {
+	if reg_idx == -1 {
 		p.error_with_pos('cannot register interface `${interface_name}`, another type with this name exists',
 			name_pos)
 		return ast.InterfaceDecl{}

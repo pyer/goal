@@ -583,7 +583,7 @@ fn (mut p Parser) top_stmt() ast.Stmt {
 							expr: if_expr
 							pos:  if_expr.pos
 						}
-						if p.pref.is_fmt || comptime_if_expr_contains_top_stmt(if_expr) {
+						if comptime_if_expr_contains_top_stmt(if_expr) {
 							return cur_stmt
 						} else {
 							return p.other_stmts(cur_stmt)
@@ -710,8 +710,6 @@ fn (mut p Parser) other_stmts(cur_stmt ast.Stmt) ast.Stmt {
 			scope:       p.scope
 			label_names: p.label_names
 		}
-	} else if p.pref.is_fmt || p.pref.is_vet {
-		return p.stmt(false)
 	} else {
 		return p.error('bad top level statement ' + p.tok.str())
 	}
@@ -1008,7 +1006,7 @@ fn (mut p Parser) stmt(is_top_level bool) ast.Stmt {
 			}
 		}
 		.key_go, .key_spawn {
-			if (p.pref.use_coroutines || p.pref.is_fmt) && p.tok.kind == .key_go {
+			if p.pref.use_coroutines && p.tok.kind == .key_go {
 				go_expr := p.go_expr()
 				return ast.ExprStmt{
 					expr: go_expr
@@ -1115,7 +1113,7 @@ fn (mut p Parser) parse_multi_expr(is_top_level bool) ast.Stmt {
 	// TODO: remove translated
 	if p.tok.kind.is_assign() {
 		return p.partial_assign_stmt(left)
-	} else if !p.pref.translated && !p.is_translated && !p.pref.is_fmt && !p.pref.is_vet
+	} else if !p.pref.translated && !p.is_translated
 		&& tok.kind !in [.key_if, .key_match, .key_lock, .key_rlock, .key_select] {
 		for node in left {
 			if (is_top_level || p.tok.kind !in [.comment, .rcbr])
@@ -1339,11 +1337,6 @@ fn (mut p Parser) name_expr() ast.Expr {
 				pos = pos.extend(p.tok.pos())
 				p.next()
 			} else {
-				if p.pref.is_fmt {
-					map_init := p.map_init()
-					p.check(.rcbr)
-					return map_init
-				}
 				p.error('`}` expected; explicit `map` initialization does not support parameters')
 			}
 		}
@@ -1709,7 +1702,7 @@ fn (mut p Parser) name_expr() ast.Expr {
 			return node
 		} else if is_option && p.tok.kind == .lsbr {
 			return p.array_init(is_option, ast.void_type)
-		} else if !known_var && language == .v && p.peek_tok.kind == .dot && !p.pref.is_fmt {
+		} else if !known_var && language == .v && p.peek_tok.kind == .dot {
 			peek_tok2 := p.peek_token(2)
 			peek_tok3 := p.peek_token(3)
 			mod = p.tok.lit
@@ -2048,17 +2041,6 @@ fn (mut p Parser) dot_expr(left ast.Expr) ast.Expr {
 		mut left_node := unsafe { left }
 		if mut left_node is ast.CallExpr {
 			left_node.is_return_used = true
-		}
-		if p.pref.is_fmt {
-			if mut left_node is ast.Ident {
-				// `time.now()` without `time imported` is processed as a method call with `time` being
-				// a `left_node` expression. Import `time` automatically.
-				// TODO: fetch all available modules
-				if left_node.name in ['time', 'os', 'strings', 'math', 'json', 'base64']
-					&& !left_node.scope.known_var(left_node.name) {
-					p.register_implied_import(left_node.name)
-				}
-			}
 		}
 		mcall_expr := ast.CallExpr{
 			left:              left
@@ -2547,7 +2529,7 @@ fn (mut p Parser) global_decl() ast.GlobalDecl {
 		}
 	}
 
-	if !p.has_globals && !p.pref.enable_globals && !p.pref.is_fmt && !p.pref.is_vet
+	if !p.has_globals && !p.pref.enable_globals
 		&& !p.pref.translated && !p.is_translated && !p.builtin_mod {
 		p.error('use `v -enable-globals ...` to enable globals')
 		return ast.GlobalDecl{}
@@ -2799,8 +2781,7 @@ fn (mut p Parser) type_decl() ast.TypeDecl {
 			}
 			is_pub: is_pub
 		})
-		if typ in [ast.string_type_idx, ast.rune_type_idx, ast.array_type_idx, ast.map_type_idx]
-			&& !p.pref.is_fmt {
+		if typ in [ast.string_type_idx, ast.rune_type_idx, ast.array_type_idx, ast.map_type_idx] {
 			p.error_with_pos('cannot register sum type `${name}`, another type with this name exists',
 				name_pos)
 			return ast.SumTypeDecl{}
@@ -2858,8 +2839,7 @@ fn (mut p Parser) type_decl() ast.TypeDecl {
 		is_pub:     is_pub
 	})
 	type_end_pos := p.prev_tok.pos()
-	if idx in [ast.string_type_idx, ast.rune_type_idx, ast.array_type_idx, ast.map_type_idx]
-		&& !p.pref.is_fmt {
+	if idx in [ast.string_type_idx, ast.rune_type_idx, ast.array_type_idx, ast.map_type_idx] {
 		p.error_with_pos('cannot register alias `${name}`, another type with this name exists',
 			name_pos)
 		return ast.AliasTypeDecl{}

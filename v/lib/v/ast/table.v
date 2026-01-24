@@ -75,7 +75,6 @@ pub mut:
 	interfaces         map[int]InterfaceDecl
 	sumtypes           map[int]SumTypeDecl
 	cmod_prefix        string // needed for ast.type_to_str(Type) while vfmt; contains `os.`
-	is_fmt             bool
 	used_features      &UsedFeatures = &UsedFeatures{} // filled in by the builder via markused module, when pref.skip_unused = true;
 	veb_res_idx_cache  int // Cache of `veb.Result` type
 	veb_ctx_idx_cache  int // Cache of `veb.Context` type
@@ -164,7 +163,6 @@ pub fn new_table() &Table {
 		cur_fn:       unsafe { nil }
 	}
 	t.register_builtin_type_symbols()
-	t.is_fmt = true
 	global_table = t
 	return t
 }
@@ -200,10 +198,6 @@ pub fn (t &Table) fn_type_source_signature(f &Fn) string {
 	for i, arg in f.params {
 		if arg.is_mut {
 			sig += 'mut '
-		}
-		// Note: arg name is only added for fmt, else it would causes errors with generics
-		if t.is_fmt && arg.name != '' {
-			sig += '${arg.name} '
 		}
 		arg_type_sym := t.sym(arg.typ)
 		sig += arg_type_sym.name

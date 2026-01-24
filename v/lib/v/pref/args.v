@@ -77,9 +77,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 			'-Wfatal-errors' {
 				res.fatal_errors = true
 			}
-			'-silent' {
-				res.output_mode = .silent
-			}
 			'-cstrict' {
 				res.is_cstrict = true
 			}
@@ -99,9 +96,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 			}
 			'-div-by-zero-is-zero' {
 				res.div_by_zero_is_zero = true
-			}
-			'-repl' {
-				res.is_repl = true
 			}
 			'-json-errors' {
 				res.json_errors = true

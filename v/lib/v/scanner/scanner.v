@@ -43,7 +43,6 @@ pub mut:
 	is_print_rel_paths_on_error bool
 	quote                       u8   // which quote is used to denote current string: ' or "
 	nr_lines                    int  // total number of lines in the source file that were scanned
-	is_fmt                      bool // Used for v fmt.
 	comments_mode               CommentsMode
 	is_inside_toplvl_statement  bool          // *only* used in comments_mode: .toplevel_comments, toggled by parser
 	all_tokens                  []token.Token // *only* used in comments_mode: .toplevel_comments, contains all tokens
@@ -120,7 +119,6 @@ pub fn new_scanner_file(file_path string, file_idx i16, comments_mode CommentsMo
 		is_print_line_on_error:      true
 		is_print_colored_error:      true
 		is_print_rel_paths_on_error: true
-		is_fmt:                      pref_.is_fmt
 		comments_mode:               comments_mode
 		file_path:                   file_path
 		file_base:                   os.base(file_path)
@@ -141,7 +139,6 @@ pub fn new_scanner(text string, comments_mode CommentsMode, pref_ &pref.Preferen
 		is_print_line_on_error:      true
 		is_print_colored_error:      true
 		is_print_rel_paths_on_error: true
-		is_fmt:                      pref_.is_fmt
 		comments_mode:               comments_mode
 		file_path:                   internally_generated_v_code
 		file_base:                   internally_generated_v_code
@@ -251,9 +248,6 @@ fn (mut s Scanner) ident_name() string {
 }
 
 fn (s &Scanner) num_lit(start int, end int) string {
-	if s.is_fmt {
-		return s.text[start..end]
-	}
 	unsafe {
 		txt := s.text.str
 		mut b := malloc_noscan(end - start + 1) // add a byte for the endstring 0
@@ -898,9 +892,6 @@ pub fn (mut s Scanner) text_scan() token.Token {
 					s.pos++
 					name = s.ident_name()
 				}
-				if s.is_fmt {
-					return s.new_token(.name, '@' + name, name.len + 1)
-				}
 				// @FN, @STRUCT, @MOD etc. See full list in token.valid_at_tokens
 				if '@' + name in token.valid_at_tokens || name.starts_with('cc') { // `=@cccond` in inline assembly
 					return s.new_token(.at, '@' + name, name.len + 1)
@@ -1109,10 +1100,7 @@ pub fn (mut s Scanner) text_scan() token.Token {
 								col:      u16_col(s.current_column() - comment.len - 4)
 								file_idx: s.file_idx
 							}
-							if !s.pref.is_fmt {
-								s.error_with_pos('inline comment is deprecated, please use line comment',
-									comment_pos)
-							}
+							s.error_with_pos('inline comment is deprecated, please use line comment', comment_pos)
 							comment = '\x01' + comment.trim(' ')
 						}
 						return s.new_multiline_token(.comment, comment, comment.len + 4,
@@ -1289,8 +1277,7 @@ pub fn (mut s Scanner) ident_string() string {
 		end++
 	}
 	if start <= s.pos {
-		mut string_so_far := s.text[start..end]
-		if !s.is_fmt {
+		  mut string_so_far := s.text[start..end]
 			mut segment_idx := 0
 			s.str_segments.clear()
 			if s.u16_escapes_pos.len + s.h_escapes_pos.len + s.u32_escapes_pos.len > 0 {
@@ -1324,7 +1311,6 @@ pub fn (mut s Scanner) ident_string() string {
 				s.str_segments << string_so_far[segment_idx..]
 			}
 			string_so_far = s.str_segments.join('')
-		}
 
 		if n_cr_chars > 0 {
 			string_so_far = string_so_far.replace('\r', '')
@@ -1539,9 +1525,6 @@ pub fn (mut s Scanner) ident_char() string {
 	}
 	len--
 	mut c := s.text[start + 1..s.pos]
-	if s.is_fmt {
-		return c
-	}
 	if len != 1 {
 		// the string inside the backticks is longer than one character
 		// but we might only have one rune... attempt to decode escapes
@@ -1669,7 +1652,7 @@ pub fn (mut s Scanner) note(msg string) {
 		pos:      s.pos
 		file_idx: s.file_idx
 	}
-	if s.pref.output_mode == .stdout && !s.pref.check_only {
+	if !s.pref.check_only {
 		util.show_compiler_message('notice:', pos: pos, file_path: s.file_path, message: msg)
 	} else {
 		s.notices << errors.Notice{
@@ -1709,7 +1692,7 @@ pub fn (mut s Scanner) warn_with_pos(msg string, pos token.Pos) {
 		return
 	}
 	details := s.eat_details()
-	if s.pref.output_mode == .stdout && !s.pref.check_only {
+	if !s.pref.check_only {
 		util.show_compiler_message('warning:',
 			pos:       pos
 			file_path: s.file_path
@@ -1737,7 +1720,7 @@ pub fn (mut s Scanner) error(msg string) {
 
 pub fn (mut s Scanner) error_with_pos(msg string, pos token.Pos) {
 	details := s.eat_details()
-	if s.pref.output_mode == .stdout && !s.pref.check_only {
+	if !s.pref.check_only {
 		util.show_compiler_message('error:',
 			pos:       pos
 			file_path: s.file_path

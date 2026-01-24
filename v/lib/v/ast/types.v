@@ -1574,20 +1574,7 @@ pub fn (t &Table) type_to_str_using_aliases(typ Type, import_aliases map[string]
 		}
 		.function {
 			info := sym.info as FnType
-			if !t.is_fmt {
-				res = t.fn_signature(info.func, type_only: true)
-			} else {
-				if res.starts_with('fn (') {
-					// fn foo ()
-					has_names := info.func.params.any(it.name != '')
-					res = t.fn_signature_using_aliases(info.func, import_aliases,
-						type_only: !has_names
-					)
-				} else {
-					// FnFoo
-					res = t.shorten_user_defined_typenames(res, import_aliases)
-				}
-			}
+			res = t.fn_signature(info.func, type_only: true)
 		}
 		.map {
 			if int(typ) == map_type_idx {
@@ -1703,9 +1690,7 @@ fn (t &Table) shorten_user_defined_typenames(original_name string, import_aliase
 	}
 	mut mod, mut typ := original_name.rsplit_once('.') or { return original_name }
 	if !mod.contains('[') {
-		if !t.is_fmt {
-			mod = mod.all_after_last('.')
-		}
+		mod = mod.all_after_last('.')
 		if alias := import_aliases[mod] {
 			mod = alias
 		} else if t.cmod_prefix != '' {

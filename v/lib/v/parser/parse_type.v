@@ -77,13 +77,6 @@ fn (mut p Parser) eval_array_fixed_sizes(mut size_expr ast.Expr) (int, bool) {
 						size_unresolved = false
 					}
 				}
-			} else {
-				if p.pref.is_fmt {
-					// for vfmt purposes, pretend the constant does exist
-					// it may have been defined in another .v file:
-					fixed_size = 1
-					size_unresolved = false
-				}
 			}
 		}
 		ast.InfixExpr {
@@ -109,11 +102,7 @@ fn (mut p Parser) parse_array_type(expecting token.Kind, is_option bool) ast.Typ
 		mut fixed_size := 0
 		mut size_expr := p.expr(0)
 		mut size_unresolved := true
-		if p.pref.is_fmt {
-			fixed_size = 987654321
-		} else {
-			fixed_size, size_unresolved = p.eval_array_fixed_sizes(mut size_expr)
-		}
+		fixed_size, size_unresolved = p.eval_array_fixed_sizes(mut size_expr)
 		p.check(.rsbr)
 		p.fixed_array_dim++
 		defer {
@@ -663,7 +652,7 @@ fn (mut p Parser) parse_any_type(language ast.Language, is_ptr bool, check_dot b
 			p.next()
 			p.check(.dot)
 		}
-		if mod != p.mod && !p.known_import(mod) && !p.pref.is_fmt {
+		if mod != p.mod && !p.known_import(mod) {
 			mut msg := 'unknown module `${mod}`'
 			if mod.len > mod_last_part.len && p.known_import(mod_last_part) {
 				msg += '; did you mean `${mod_last_part}`?'
@@ -979,7 +968,7 @@ fn (mut p Parser) parse_generic_inst_type(name string, name_pos token.Pos) ast.T
 	p.inside_generic_params = false
 	bs_name += ']'
 	// fmt operates on a per-file basis, so is_instance might be not set correctly. Thus it's ignored.
-	if (is_instance || p.pref.is_fmt) && concrete_types.len > 0 {
+	if is_instance && concrete_types.len > 0 {
 		mut gt_idx := p.table.find_type_idx(bs_name)
 		if gt_idx > 0 {
 			return ast.new_type(gt_idx)
