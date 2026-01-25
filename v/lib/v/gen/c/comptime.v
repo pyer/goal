@@ -44,11 +44,13 @@ fn (mut g Gen) gen_comptime_selector(expr ast.ComptimeSelector) string {
 }
 
 fn (mut g Gen) comptime_call(mut node ast.ComptimeCall) {
+/*
 	if node.kind == .embed_file {
 		// $embed_file('/path/to/file')
 		g.gen_embed_file_init(mut node)
 		return
 	}
+*/
 	if node.kind == .env {
 		// $env('ENV_VAR_NAME')
 		// TODO: deprecate after support for $d() is stable

@@ -995,47 +995,6 @@ pub fn vtmp_dir() string {
 	return vtmp
 }
 
-fn default_vmodules_path() string {
-	hdir := home_dir()
-	res := join_path_single(hdir, '.vmodules')
-	return res
-}
-
-// vmodules_dir returns the path to a folder, where v stores its global modules.
-pub fn vmodules_dir() string {
-	paths := vmodules_paths()
-	if paths.len > 0 {
-		return paths[0]
-	}
-	return default_vmodules_path()
-}
-
-// vmodules_paths returns a list of paths, where v looks up for modules.
-// You can customize it through setting the environment variable `VMODULES`.
-pub fn vmodules_paths() []string {
-	mut path := getenv('VMODULES')
-	if path == '' {
-		// unsafe { path.free() }
-		path = default_vmodules_path()
-	}
-	defer {
-		// unsafe { path.free() }
-	}
-	splitted := path.split(path_delimiter)
-	defer {
-		// unsafe { splitted.free() }
-	}
-	mut list := []string{cap: splitted.len}
-	for i in 0 .. splitted.len {
-		si := splitted[i]
-		trimmed := si.trim_right(path_separator)
-		list << trimmed
-		// unsafe { trimmed.free() }
-		// unsafe { si.free() }
-	}
-	return list
-}
-
 // resource_abs_path returns an absolute path, for the given `path`.
 // (the path is expected to be relative to the executable program)
 // See https://discordapp.com/channels/592103645835821068/592294828432424960/630806741373943808

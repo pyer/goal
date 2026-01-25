@@ -80,9 +80,8 @@ pub mut:
 	prealloc         bool
 	vexe             string
 	vroot            string
-	vlib             string   // absolute path to the lib folder
-  vmodules         string   // absolute path to the modules folder
-	vmodules_paths   []string // absolute paths to the vmodules folders, by default ['/home/user/.vmodules'], can be overridden by setting VMODULES
+	vlib             string // absolute path to the lib folder
+	vmodules         string // absolute path to the modules folder
 	path             string // Path to the source file to compile
 	target_c         string // Name of the generated C source
 	target           string // Name of the generated executable
@@ -107,7 +106,6 @@ pub mut:
 	fatal_errors     bool // unconditionally exit after the first error with exit(1)
 
 	check_only        bool // when true, just parse the files and run the checker
-	experimental      bool // enable experimental features
 	skip_unused       bool // skip generating C code for functions, that are not used
 
 	use_color           ColorOutput // whether the warnings/errors should use ANSI color escapes.
@@ -127,13 +125,10 @@ pub mut:
 	// game prototyping flags:
 	div_by_zero_is_zero bool // -div-by-zero-is-zero makes so `x / 0 == 0`, i.e. eliminates the division by zero panics/segfaults
 	// forwards compatibility settings:
-	relaxed_gcc14 bool = true // turn on the generated pragmas, that make gcc versions > 14 a lot less pedantic. The default is to have those pragmas in the generated C output, so that gcc-14 can be used on Arch etc.
 	//
 	is_vls        bool
 	json_errors   bool // -json-errors, for VLS and other tools
-	new_transform bool // temporary for the new transformer
 }
-
 
 @[noreturn]
 pub fn eprintln_exit(s string) {

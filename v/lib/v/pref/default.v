@@ -5,8 +5,6 @@ module pref
 
 import os
 
-pub const default_module_path = os.vmodules_dir()
-
 pub fn (mut p Preferences) defines_map_unique_keys() string {
 	mut defines_map := map[string]bool{}
 	for d in p.compile_defines {

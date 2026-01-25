@@ -94,9 +94,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 			'-warn-about-allocs' {
 				res.warn_about_allocs = true
 			}
-			'-div-by-zero-is-zero' {
-				res.div_by_zero_is_zero = true
-			}
 			'-json-errors' {
 				res.json_errors = true
 			}
@@ -112,9 +109,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 			}
 			'-force-bounds-checking' {
 				res.force_bounds_checking = true
-			}
-			'-no-relaxed-gcc14' {
-				res.relaxed_gcc14 = false
 			}
 			'-prod' {
 				res.is_prod = true
@@ -159,12 +153,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 			'-test-runner' {
 				res.test_runner = cmdline.option(args[i..], arg, res.test_runner)
 				i++
-			}
-			'-experimental' {
-				res.experimental = true
-			}
-			'-new-transformer' {
-				res.new_transform = true
 			}
 			'-use-os-system-to-run' {
 				res.use_os_system_to_run = true

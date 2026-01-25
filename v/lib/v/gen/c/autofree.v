@@ -189,11 +189,7 @@ fn (mut g Gen) autofree_variable(v ast.Var) {
 	is_user_ref := v.typ.is_ptr() && sym.name.after('.')[0].is_capital()
 	// if g.pref.experimental && v.typ.is_ptr() && sym.name.after('.')[0].is_capital() {
 	if is_user_ref {
-		if g.pref.experimental {
-			g.autofree_var_call('free', v)
-		} else {
-			g.print_autofree_var(v, 'user reference type, use -experimental to autofree those')
-		}
+		g.print_autofree_var(v, 'user reference type, no autofree')
 	}
 	if sym.has_method('free') {
 		g.autofree_var_call(free_fn, v)

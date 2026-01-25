@@ -21,34 +21,9 @@ import v.depgraph
 // reliable multi use function. see comments in util/module.v
 fn find_module_path(mod string, fpath string, module_search_paths []string) !string {
   // println("find_module_path( ${mod}, ${fpath}, ${module_search_paths})")
-  /*
-	// support @VROOT/v.mod relative paths:
-	mut mcache := vmod.get_cache()
-	vmod_file_location := mcache.get_by_file(fpath)
-	mod_path := mod.replace('.', os.path_separator)
-	mut module_lookup_paths := []string{}
-	if vmod_file_location.vmod_file.len != 0
-		&& vmod_file_location.vmod_folder !in module_search_paths {
-		module_lookup_paths << vmod_file_location.vmod_folder
-	}
-*/
 	mut module_lookup_paths := []string{}
 	module_lookup_paths << module_search_paths
 	module_lookup_paths << os.getwd()
-
-/*
-	// go up through parents looking for modules a folder.
-	// we need a proper solution that works most of the time. look at vdoc.get_parent_mod
-	if fpath.contains(os.path_separator + 'modules' + os.path_separator) {
-		parts := fpath.split(os.path_separator)
-		for i := parts.len - 2; i >= 0; i-- {
-			if parts[i] == 'modules' {
-				module_lookup_paths << parts[0..i + 1].join(os.path_separator)
-				break
-			}
-		}
-	}
-*/
 
 	mod_path := mod.replace('.', os.path_separator)
   //println("find_module_path( ${mod_path}, ${module_lookup_paths})")
@@ -58,6 +33,9 @@ fn find_module_path(mod string, fpath string, module_search_paths []string) !str
 			return try_path
 		}
 	}
+
+
+
 	// look up through parents
 	path_parts := fpath.split(os.path_separator)
 	for i := path_parts.len - 2; i > 0; i-- {
@@ -154,14 +132,11 @@ pub fn parse_imports(mut all_parsed_files []&ast.File, mut table ast.Table, pref
 				continue
 			}
 			import_path := find_module_path(mod, ast_file.path, pref_.lookup_path) or {
-				// v.parsers[i].error_with_token_index('cannot import module "$mod" (not found)', v.parsers[i].import_ast.get_import_tok_idx(mod))
-				// break
 				all_parsed_files[i].errors << error_with_pos('cannot import module "${mod}" (not found)', ast_file.path, imp.pos)
 				break
 			}
 			v_files := v_files_from_dir(import_path)
 			if v_files.len == 0 {
-				// v.parsers[i].error_with_token_index('cannot import module "$mod" (no .v files in "$import_path")', v.parsers[i].import_ast.get_import_tok_idx(mod))
 				all_parsed_files[i].errors << error_with_pos('cannot import module "${mod}" (no .v files in "${import_path}")', ast_file.path, imp.pos)
 				continue
 			}

@@ -19,7 +19,6 @@ fn trace_qualify(callfn string, mod string, file_path string, kind_res string, r
 pub fn qualify_import(pref_ &pref.Preferences, mod string, file_path string) string {
 	// comments are from workdir: /v/vls
 	mut mod_paths := pref_.lookup_path.clone()
-	mod_paths << os.vmodules_paths()
 	mod_path := mod.replace('.', os.path_separator)
 	for search_path in mod_paths {
 		try_path := os.join_path_single(search_path, mod_path)

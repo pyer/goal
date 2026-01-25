@@ -2211,8 +2211,7 @@ fn (mut c Checker) enum_decl(mut node ast.EnumDecl) {
 		enum_imin *= -1
 	}
 	for i, mut field in node.fields {
-		if !c.pref.experimental && util.contains_capital(field.name) {
-			// TODO: C2V uses hundreds of enums with capitals, remove -experimental check once it's handled
+		if util.contains_capital(field.name) {
 			c.error('field name `${field.name}` cannot contain uppercase letters, use snake_case instead',
 				field.pos)
 		}
@@ -5047,11 +5046,6 @@ fn (mut c Checker) prefix_expr(mut node ast.PrefixExpr) ast.Type {
 		if expr in [ast.BoolLiteral, ast.CallExpr, ast.CharLiteral, ast.FloatLiteral, ast.IntegerLiteral,
 			ast.InfixExpr, ast.StringLiteral, ast.StringInterLiteral] {
 			c.error('cannot take the address of ${expr}', node.pos)
-		}
-		if mut expr is ast.Ident {
-			if expr.kind == .constant && !c.inside_unsafe && c.pref.experimental {
-				c.warn('cannot take the address of const outside `unsafe`', expr.pos)
-			}
 		}
 		if expr is ast.SelectorExpr {
 			typ_sym := c.table.sym(right_type)

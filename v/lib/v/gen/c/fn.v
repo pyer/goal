@@ -937,13 +937,7 @@ fn (mut g Gen) call_expr(node ast.CallExpr) {
 		}
 	}
 	if node.is_method && !node.is_field {
-		if g.pref.experimental && node.args.len > 0 && node.name == 'writeln'
-			&& node.args[0].expr is ast.StringInterLiteral
-			&& g.table.sym(node.receiver_type).name == 'strings.Builder' {
-			g.string_inter_literal_sb_optimized(node)
-		} else {
-			g.method_call(node)
-		}
+		g.method_call(node)
 	} else {
 		g.fn_call(node)
 	}
