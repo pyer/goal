@@ -32,12 +32,12 @@ pub mut:
 	os                  OS // the OS to compile for
 	build_mode          BuildMode
 	// verbosity           VerboseLevel
-	is_verbose         bool
-	is_test            bool   // `v test string_test.v`
+	is_debug           bool // turned on by -g/-debug or -cg/-cdebug, it tells v to pass -g to the C backend compiler.
 	is_prod            bool   // use "-O3"
 	no_prod_options    bool   // `-no-prod-options`, means do not pass any optimization flags to the C compilation, while still allowing the user to use for example `-cflags -Os` to pass custom ones
   is_run             bool // run the executable after compilation
-	is_debug           bool // turned on by -g/-debug or -cg/-cdebug, it tells v to pass -g to the C backend compiler.
+	is_test            bool   // `v string_test.v`
+	is_verbose         bool
 	show_asserts       bool // `VTEST_SHOW_ASSERTS=1 v file_test.v` will show details about the asserts done by a test file. Also activated for `-stats` and `-show-asserts`.
 	show_timings       bool // show how much time each compiler stage took
 	show_version       bool // -v, -V, -version or --version was passed

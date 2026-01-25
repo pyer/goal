@@ -181,18 +181,6 @@ pub fn mark_used(mut table ast.Table, pref_ &pref.Preferences, ast_files []&ast.
 			all_fn_root_names << k
 			continue
 		}
-		// testing framework:
-		if pref_.is_test {
-			if k.starts_with('test_')
-				|| (has_dot && (k.contains('.test_') || k.contains('.vtest_'))) {
-				all_fn_root_names << k
-				continue
-			}
-			if k.starts_with('testsuite_') || (has_dot && k.contains('.testsuite_')) {
-				all_fn_root_names << k
-				continue
-			}
-		}
 		if pref_.prealloc && k.starts_with('prealloc_') {
 			all_fn_root_names << k
 			continue
@@ -203,17 +191,6 @@ pub fn mark_used(mut table ast.Table, pref_ &pref.Preferences, ast_files []&ast.
 	if pref_.is_debug {
 		all_fn_root_names << 'panic_debug'
 		all_fn_root_names << 'tos3'
-	}
-	if pref_.is_test {
-		all_fn_root_names << 'main.cb_assertion_ok'
-		all_fn_root_names << 'main.cb_assertion_failed'
-		if benched_tests_sym := table.find_sym('main.BenchedTests') {
-			bts_type := benched_tests_sym.methods[0].params[0].typ.str()
-			all_fn_root_names << bts_type + '.testing_step_start'
-			all_fn_root_names << bts_type + '.testing_step_end'
-			all_fn_root_names << bts_type + '.end_testing'
-			all_fn_root_names << 'main.start_testing'
-		}
 	}
 
 	handle_vweb(mut table, mut all_fn_root_names, 'veb.Result', 'veb.filter', 'veb.Context')

@@ -674,8 +674,6 @@ fn (mut p Parser) fn_decl() ast.FnDecl {
 	if is_main {
 		p.main_already_defined = true
 	}
-	is_test := (!is_method && params.len == 0) && p.inside_test_file
-		&& (short_fn_name.starts_with('test_') || short_fn_name.starts_with('testsuite_'))
 	file_mode := p.file_backend_mode
 	if is_main {
 		if _ := p.table.find_fn('main.main') {
@@ -749,7 +747,6 @@ run them via `v file.v` instead',
 			is_unsafe:     is_unsafe
 			is_must_use:   is_must_use
 			is_main:       is_main
-			is_test:       is_test
 			is_keep_alive: is_keep_alive
 			is_method:     true
 			receiver_type: rec.typ
@@ -801,7 +798,6 @@ run them via `v file.v` instead',
 			is_unsafe:             is_unsafe
 			is_must_use:           is_must_use
 			is_main:               is_main
-			is_test:               is_test
 			is_keep_alive:         is_keep_alive
 			is_method:             false
 			is_static_type_method: is_static_type_method
@@ -883,7 +879,6 @@ run them via `v file.v` instead',
 		is_c_variadic:      is_c_variadic
 		is_c_extern:        is_c_extern
 		is_main:            is_main
-		is_test:            is_test
 		is_keep_alive:      is_keep_alive
 		is_unsafe:          is_unsafe
 		is_must_use:        is_must_use

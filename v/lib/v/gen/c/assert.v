@@ -124,9 +124,6 @@ fn (mut g Gen) gen_assert_postfailure_mode(node ast.AssertStmt) {
 			g.writeln('\tprint_backtrace();')
 		}
 	}
-	if g.pref.is_test {
-		g.writeln('\tlongjmp(g_jump_buffer, 1);')
-	}
 	if g.pref.assert_failure_mode != .continues {
 		g.writeln('\tbuiltin___v_panic(_S("Assertion failed..."));')
 	}

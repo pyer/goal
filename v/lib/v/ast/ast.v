@@ -598,7 +598,6 @@ pub:
 	is_noreturn           bool        // true, when @[noreturn] is used on a fn
 	is_manualfree         bool        // true, when @[manualfree] is used on a fn
 	is_main               bool        // true for `fn main()`
-	is_test               bool        // true for `fn test_abcde() {}`, false for `fn test_abc(x int) {}`, or for fns that do not start with test_
 	is_conditional        bool        // true for `@[if abc] fn abc(){}`
 	is_exported           bool        // true for `@[export: 'exact_C_name']`
 	is_keep_alive         bool        // passed memory must not be freed (by GC) before function returns
@@ -701,7 +700,6 @@ pub:
 	is_must_use           bool // `@[must_use] fn abc(){}`
 	is_placeholder        bool
 	is_main               bool // `fn main(){}`
-	is_test               bool // `fn test_abc(){}`
 	is_keep_alive         bool // passed memory must not be freed (by GC) before function returns
 	is_method             bool // true for `fn (x T) name()`, and for interface declarations (which are also for methods)
 	is_static_type_method bool // true for `fn Foo.bar() {}`
@@ -1077,7 +1075,6 @@ pub:
 	nr_tokens     int    // number of processed tokens in the source code of the file
 	mod           Module // the module of the source file (from `module xyz` at the top)
 	global_scope  &Scope = unsafe { nil }
-	is_test       bool // true for _test.v files
 	is_generated  bool // true for `@[generated] module xyz` files; turn off notices
 	is_translated bool // true for `@[translated] module xyz` files; turn off some checks
 	language      Language

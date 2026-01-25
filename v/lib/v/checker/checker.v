@@ -330,7 +330,6 @@ pub fn (mut c Checker) reorder_fns_at_the_end(mut ast_file ast.File) {
 }
 
 pub fn (mut c Checker) check_scope_vars(sc &ast.Scope) {
-	if !c.file.is_test {
 		for _, obj in sc.objects {
 			match obj {
 				ast.Var {
@@ -352,7 +351,6 @@ pub fn (mut c Checker) check_scope_vars(sc &ast.Scope) {
 				else {}
 			}
 		}
-	}
 	for child in sc.children {
 		c.check_scope_vars(child)
 	}
@@ -417,7 +415,6 @@ pub fn (mut c Checker) check_files(ast_files []&ast.File) {
 			c.timers.show('checker_check ${file.path}')
 		}
 		if has_main_mod_file && !has_main_fn && files_from_main_module.len > 0 {
-			if !c.pref.is_test {
 				// files_from_main_module contain preludes at the start
 				mut the_main_file := files_from_main_module.last()
 				the_main_file.stmts << ast.FnDecl{
@@ -431,7 +428,6 @@ pub fn (mut c Checker) check_files(ast_files []&ast.File) {
 					}
 				}
 				has_main_fn = true
-			}
 		}
 	}
 	c.timers.start('checker_post_process_generic_fns')
@@ -476,22 +472,8 @@ pub fn (mut c Checker) check_files(ast_files []&ast.File) {
 	c.verify_all_vweb_routes()
 	c.timers.show('checker_verify_all_vweb_routes')
 
-	if c.pref.is_test {
-		mut n_test_fns := 0
-		for _, f in c.table.fns {
-			if f.is_test {
-				n_test_fns++
-			}
-		}
-		if n_test_fns == 0 {
-			c.add_error_detail('The name of a test function in V, should start with `test_`.')
-			c.add_error_detail('The test function should take 0 parameters, and no return type. Example:')
-			c.add_error_detail('fn test_xyz(){ assert 2 + 2 == 4 }')
-			c.error('a _test.v file should have *at least* one `test_` function', token.Pos{})
-		}
-	}
 	// Make sure fn main is defined in non lib builds
-	if c.pref.build_mode == .build_module || c.pref.is_test {
+	if c.pref.build_mode == .build_module {
 		return
 	}
 	if c.pref.no_builtin {
@@ -1553,7 +1535,7 @@ fn (mut c Checker) check_expr_option_or_result_call(expr ast.Expr, ret_type ast.
 fn (mut c Checker) check_or_expr(node ast.OrExpr, ret_type ast.Type, expr_return_type ast.Type, expr ast.Expr) {
 	if node.kind == .propagate_option {
 		if c.table.cur_fn != unsafe { nil } && !c.table.cur_fn.return_type.has_flag(.option)
-			&& !c.table.cur_fn.is_main && !c.table.cur_fn.is_test && !c.inside_const {
+			&& !c.table.cur_fn.is_main && !c.inside_const {
 			c.add_instruction_for_option_type()
 			if expr is ast.Ident {
 				c.error('to propagate the Option, `${c.table.cur_fn.name}` must return an Option type',
@@ -1576,7 +1558,7 @@ fn (mut c Checker) check_or_expr(node ast.OrExpr, ret_type ast.Type, expr_return
 	}
 	if node.kind == .propagate_result {
 		if c.table.cur_fn != unsafe { nil } && !c.table.cur_fn.return_type.has_flag(.result)
-			&& !c.table.cur_fn.is_main && !c.table.cur_fn.is_test && !c.inside_const {
+			&& !c.table.cur_fn.is_main && !c.inside_const {
 			c.add_instruction_for_result_type()
 			c.error('to propagate the call, `${c.table.cur_fn.name}` must return a Result type',
 				node.pos)
@@ -4427,7 +4409,7 @@ fn (mut c Checker) ident(mut node ast.Ident) ast.Type {
 					return obj.typ
 				}
 				ast.ConstField {
-					if !(obj.is_pub || obj.mod == c.mod || c.pref.is_test) {
+					if !(obj.is_pub || obj.mod == c.mod) {
 						c.error('constant `${obj.name}` is private', node.pos)
 					}
 					mut typ := obj.typ

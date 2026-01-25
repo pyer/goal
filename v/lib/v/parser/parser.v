@@ -33,7 +33,6 @@ mut:
 	struct_language          ast.Language // for `struct C.abcd{ embedded struct/union }` declarations
 	expr_level               int          // prevent too deep recursions for pathological programs
 	inside_vlib_file         bool         // true for all vlib/ files
-	inside_test_file         bool         // when inside _test.v or _test.vv file
 	inside_if                bool
 	inside_comptime_if       bool
 	inside_if_expr           bool
@@ -142,28 +141,6 @@ enum ParseContentKind {
 	text
 	stmt
 	comptime
-}
-
-// for tests
-pub fn parse_stmt(text string, mut table ast.Table, mut scope ast.Scope) ast.Stmt {
-	$if trace_parse_stmt ? {
-		eprintln('> ${@MOD}.${@FN} text: ${text}')
-	}
-	mut p := Parser{
-		content:          .stmt
-		scanner:          scanner.new_scanner(text, .skip_comments, &pref.Preferences{})
-		inside_test_file: true
-		table:            table
-		pref:             &pref.Preferences{}
-		scope:            scope
-	}
-	p.init_parse_fns()
-	util.timing_start('PARSE stmt')
-	defer {
-		util.timing_measure_cumulative('PARSE stmt')
-	}
-	p.read_first_token()
-	return p.stmt(false)
 }
 
 pub fn parse_comptime(tmpl_path string, text string, mut table ast.Table, pref_ &pref.Preferences, mut scope ast.Scope) &ast.File {
@@ -678,8 +655,7 @@ fn comptime_if_expr_contains_top_stmt(if_expr ast.IfExpr) bool {
 }
 
 fn (mut p Parser) other_stmts(cur_stmt ast.Stmt) ast.Stmt {
-	p.inside_fn = true
-	if !p.pref.is_test {
+	  p.inside_fn = true
 		p.script_mode = true
 		p.script_mode_start_token = p.tok
 
@@ -710,9 +686,6 @@ fn (mut p Parser) other_stmts(cur_stmt ast.Stmt) ast.Stmt {
 			scope:       p.scope
 			label_names: p.label_names
 		}
-	} else {
-		return p.error('bad top level statement ' + p.tok.str())
-	}
 }
 
 // TODO: [if vfmt]
@@ -966,7 +939,7 @@ fn (mut p Parser) stmt(is_top_level bool) ast.Stmt {
 				extra:     extra
 				extra_pos: extra_pos
 				pos:       pos.extend(p.tok.pos())
-				is_used:   p.inside_test_file || !p.pref.is_prod
+				is_used:   !p.pref.is_prod
 			}
 		}
 		.key_defer {

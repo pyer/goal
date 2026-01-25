@@ -50,7 +50,6 @@ fn main() {
   // Construct the V object from command line arguments
   println('Get builtin and user files')
   mut files := parser.get_builtin_files(prefs)
-  files << parser.get_prelude_files(prefs)
   files << parser.get_source_file(prefs)
   if prefs.is_verbose {
     println(files)
@@ -103,7 +102,7 @@ fn main() {
   compiler.cc(prefs)
 
   util.free_caches()
-  if prefs.is_run {
+  if prefs.is_run || prefs.is_test {
     mut cmd := prefs.target
     println("Execute ${cmd}")
     if !prefs.target.starts_with('/') {
@@ -111,5 +110,7 @@ fn main() {
     }
     result := os.execute(cmd)
     println(result.output)
+    os.rm(prefs.target) or {}
   }
 }
+

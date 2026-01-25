@@ -1424,7 +1424,7 @@ fn (mut c Checker) comptime_if_cond(mut cond ast.Expr, mut sb strings.Builder) (
 					cond.pos)
 			}
 			if c.comptime.comptime_for_method_var != '' && cond.expr is ast.Ident {
-				if (cond.expr as ast.Ident).name == c.comptime.comptime_for_method_var && cond.field_name in ['is_variadic', 'is_c_variadic', 'is_pub', 'is_ctor_new', 'is_deprecated', 'is_noreturn', 'is_unsafe', 'is_must_use', 'is_placeholder', 'is_main', 'is_test', 'is_keep_alive', 'is_method', 'is_static_type_method', 'no_body', 'is_file_translated', 'is_conditional', 'is_expand_simple_interpolation'] {
+				if (cond.expr as ast.Ident).name == c.comptime.comptime_for_method_var && cond.field_name in ['is_variadic', 'is_c_variadic', 'is_pub', 'is_ctor_new', 'is_deprecated', 'is_noreturn', 'is_unsafe', 'is_must_use', 'is_placeholder', 'is_main', 'is_keep_alive', 'is_method', 'is_static_type_method', 'no_body', 'is_file_translated', 'is_conditional', 'is_expand_simple_interpolation'] {
 					method := c.comptime.comptime_for_method
 					is_true = match cond.field_name {
 						'is_variadic' { method.is_variadic }
@@ -1437,7 +1437,6 @@ fn (mut c Checker) comptime_if_cond(mut cond ast.Expr, mut sb strings.Builder) (
 						'is_must_use' { method.is_must_use }
 						'is_placeholder' { method.is_placeholder }
 						'is_main' { method.is_main }
-						'is_test' { method.is_test }
 						'is_keep_alive' { method.is_keep_alive }
 						'is_method' { method.is_method }
 						'is_static_type_method' { method.is_static_type_method }

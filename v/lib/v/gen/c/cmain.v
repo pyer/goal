@@ -1,6 +1,5 @@
 module c
 
-import v.util
 import v.ast
 
 pub fn (mut g Gen) gen_c_main() {
@@ -37,16 +36,11 @@ fn (mut g Gen) gen_c_main_header() {
 	}
 }
 
-pub fn (mut g Gen) gen_c_main_footer() {
+fn (mut g Gen) gen_c_main_footer() {
 	if !g.pref.no_builtin {
 		g.writeln('\t_vcleanup();')
 	}
 	g.writeln2('\treturn 0;', '}')
-}
-
-pub fn (mut g Gen) write_tests_definitions() {
-	g.includes.writeln('#include <setjmp.h> // write_tests_main')
-	g.definitions.writeln('jmp_buf g_jump_buffer;')
 }
 
 pub fn (mut g Gen) gen_failing_error_propagation_for_test_fn(or_block ast.OrExpr, cvar_name string) {
@@ -71,63 +65,6 @@ pub fn (mut g Gen) gen_failing_return_error_for_test_fn(return_stmt ast.Return, 
 	err_msg := 'IError_name_table[${cvar_name}${dot_or_ptr}err._typ]._method_msg(${cvar_name}${dot_or_ptr}err._object)'
 	g.writeln('\tmain__TestRunner_name_table[test_runner._typ]._method_fn_error(test_runner._object, ${paline}, builtin__tos3("${pafile}"), builtin__tos3("${pamod}"), builtin__tos3("${pafn}"), ${err_msg} );')
 	g.writeln('\tlongjmp(g_jump_buffer, 1);')
-}
-
-pub fn (mut g Gen) gen_c_main_for_tests() {
-	g.writeln('')
-	g.gen_c_main_function_header()
-	g.writeln('\tmain__vtest_init();')
-	if !g.pref.no_builtin {
-		g.writeln('\t_vinit(___argc, (voidptr)___argv);')
-	}
-
-	mut all_tfuncs := g.get_all_test_function_names()
-	g.writeln('\tstring v_test_file = ${ctoslit(g.pref.path)};')
-	if g.pref.show_asserts {
-		g.writeln('\tmain__BenchedTests bt = main__start_testing(${all_tfuncs.len}, v_test_file);')
-	}
-	g.writeln2('', '\tstruct _main__TestRunner_interface_methods _vtrunner = main__TestRunner_name_table[test_runner._typ];')
-	g.writeln2('\tvoid * _vtobj = test_runner._object;', '')
-	g.writeln('\tmain__VTestFileMetaInfo_free(test_runner.file_test_info);')
-	g.writeln('\t*(test_runner.file_test_info) = main__vtest_new_filemetainfo(v_test_file, ${all_tfuncs.len});')
-	g.writeln2('\t_vtrunner._method_start(_vtobj, ${all_tfuncs.len});', '')
-	for tnumber, tname in all_tfuncs {
-		tcname := util.no_dots(tname)
-		testfn := unsafe { g.table.fns[tname] }
-		lnum := testfn.pos.line_nr + 1
-		g.writeln('\tmain__VTestFnMetaInfo_free(test_runner.fn_test_info);')
-		g.writeln('\tstring tcname_${tnumber} = _S("${tcname}");')
-		g.writeln('\tstring tcmod_${tnumber}  = _S("${testfn.mod}");')
-		g.writeln('\tstring tcfile_${tnumber} = ${ctoslit(testfn.file)};')
-		g.writeln('\t*(test_runner.fn_test_info) = main__vtest_new_metainfo(tcname_${tnumber}, tcmod_${tnumber}, tcfile_${tnumber}, ${lnum});')
-		g.writeln('\t_vtrunner._method_fn_start(_vtobj);')
-		g.writeln('\tif (!setjmp(g_jump_buffer)) {')
-		//
-		if g.pref.show_asserts {
-			g.writeln('\t\tmain__BenchedTests_testing_step_start(&bt, tcname_${tnumber});')
-		}
-		g.writeln('\t\t${tcname}();')
-		g.writeln('\t\t_vtrunner._method_fn_pass(_vtobj);')
-		//
-		g.writeln('\t}else{')
-		//
-		g.writeln('\t\t_vtrunner._method_fn_fail(_vtobj);')
-		//
-		g.writeln('\t}')
-		if g.pref.show_asserts {
-			g.writeln('\tmain__BenchedTests_testing_step_end(&bt);')
-		}
-		g.writeln('')
-	}
-	if g.pref.show_asserts {
-		g.writeln('\tmain__BenchedTests_end_testing(&bt);')
-	}
-	g.writeln2('', '\t_vtrunner._method_finish(_vtobj);')
-	g.writeln('\tint test_exit_code = _vtrunner._method_exit_code(_vtobj);')
-
-	g.writeln2('\t_vtrunner._method__v_free(_vtobj);', '')
-	g.writeln2('\t_vcleanup();', '')
-	g.writeln2('\treturn test_exit_code;', '}')
 }
 
 pub fn (mut g Gen) gen_c_main_trace_calls_hook() {

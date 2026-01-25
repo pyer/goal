@@ -3,14 +3,24 @@ module pref
 import os.cmdline
 import os
 
+pub fn vexe_path() string {
+	return os.real_path(os.executable())
+}
+
 pub fn parse_args_and_show_errors() (&Preferences) {
 	mut res := &Preferences{}
   args := os.args
 	$if x64 {
 		res.m64 = true // follow V model by default
 	}
+  res.os = .linux
 
-	mut no_skip_unused := false
+  res.vexe = os.real_path(os.executable())
+	res.vroot = os.dir(res.vexe)
+	res.vlib     = os.join_path(res.vroot, 'lib')
+	res.vmodules = os.join_path(res.vroot, 'modules')
+	res.lookup_path = [ res.vlib, res.vmodules ]
+
 	for i := 0; i < args.len; i++ {
 		arg := args[i]
 		match arg {
@@ -99,13 +109,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 			}
 			'-enable-globals' {
 				res.enable_globals = true
-			}
-			'-skip-unused' {
-				res.skip_unused = true
-			}
-			'-no-skip-unused' {
-				no_skip_unused = true
-				res.skip_unused = false
 			}
 			'-force-bounds-checking' {
 				res.force_bounds_checking = true
@@ -220,6 +223,10 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 		}
 	}
 
+  if res.path.starts_with('.') {
+    eprintln('Bad file name, cannot start with .')
+    exit(1)
+  }
   if !os.exists(res.path) {
     eprintln("${res.path} is not found")
     exit(1)
@@ -228,6 +235,7 @@ pub fn parse_args_and_show_errors() (&Preferences) {
     eprintln("${res.path} is not a file")
     exit(1)
   }
+	res.is_test = res.path.ends_with('_test.v')
 
 	if res.force_bounds_checking {
 		res.no_bounds_checking = false
@@ -256,11 +264,11 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 	if 'trace' in res.compile_defines_all {
 		res.is_trace = true
 	}
-	res.fill_with_defaults()
-		res.skip_unused = res.build_mode != .build_module
-		if no_skip_unused {
-			res.skip_unused = false
-		}
+
+	if res.is_debug {
+		res.parse_define('debug')
+	}
+	res.parse_define(res.os.lower())
 
 	return res
 }

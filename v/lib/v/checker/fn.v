@@ -487,31 +487,7 @@ fn (mut c Checker) fn_decl(mut node ast.FnDecl) {
 			}
 		}
 	}
-	// TODO: c.pref.is_vet
-	if c.file.is_test && (!node.is_method && (node.short_name.starts_with('test_')
-		|| node.short_name.starts_with('testsuite_'))) {
-		if !c.pref.is_test {
-			// simple heuristic
-			for st in node.stmts {
-				if st is ast.AssertStmt {
-					c.warn('tests will not be run, because filename does not end with `_test.v`',
-						node.pos)
-					break
-				}
-			}
-		}
 
-		if node.params.len != 0 {
-			c.error('test functions should take 0 parameters', node.pos)
-		}
-
-		if node.return_type != ast.void_type_idx
-			&& node.return_type.clear_flag(.option) != ast.void_type_idx
-			&& node.return_type.clear_flag(.result) != ast.void_type_idx {
-			c.error('test functions should either return nothing at all, or be marked to return `?` or `!`',
-				node.pos)
-		}
-	}
 	c.expected_type = ast.void_type
 	c.table.cur_fn = unsafe { node }
 	// c.table.cur_fn = node
@@ -849,8 +825,7 @@ fn (mut c Checker) call_expr(mut node ast.CallExpr) ast.Type {
 	}
 	c.expected_or_type = old_expected_or_type
 	c.markused_call_expr(left_type, mut node)
-	if !c.inside_const && c.table.cur_fn != unsafe { nil } && !c.table.cur_fn.is_main
-		&& !c.table.cur_fn.is_test {
+	if !c.inside_const && c.table.cur_fn != unsafe { nil } && !c.table.cur_fn.is_main {
 		// TODO: use just `if node.or_block.kind == .propagate_result && !c.table.cur_fn.return_type.has_flag(.result) {` after the deprecation for ?!Type
 		if node.or_block.kind == .propagate_result && !c.table.cur_fn.return_type.has_flag(.result)
 			&& !c.table.cur_fn.return_type.has_flag(.option) {
@@ -952,7 +927,7 @@ fn (mut c Checker) fn_call(mut node ast.CallExpr, mut continue_check &bool) ast.
 			c.table.used_features.comptime_calls[fn_name] = true
 		}
 	}
-	if !c.file.is_test && node.kind == .main {
+	if node.kind == .main {
 		c.error('the `main` function cannot be called in the program', node.pos)
 	}
 	mut has_generic := false // foo[T]() instead of foo[int]()
@@ -1387,7 +1362,7 @@ fn (mut c Checker) fn_call(mut node ast.CallExpr, mut continue_check &bool) ast.
 		}
 	}
 	if !func.is_pub && func.language == .v && func.name != '' && func.mod.len > 0
-		&& func.mod != c.mod && !c.pref.is_test {
+		&& func.mod != c.mod {
 		c.error('function `${func.name}` is private', node.pos)
 	}
 	if c.table.cur_fn != unsafe { nil } && !c.table.cur_fn.is_deprecated && func.is_deprecated {

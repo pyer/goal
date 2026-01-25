@@ -1,8 +1,8 @@
 module time
 
 pub const days_string = 'MonTueWedThuFriSatSun'
-pub const long_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']!
-pub const month_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]!
+pub const long_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+pub const month_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 pub const months_string = 'JanFebMarAprMayJunJulAugSepOctNovDec'
 pub const long_months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
 	'September', 'October', 'November', 'December']

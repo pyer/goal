@@ -19,8 +19,6 @@ pub fn (mut p Parser) set_path(path string) {
 	p.file_display_path = os.real_path(p.file_path).replace_once(normalised_working_folder,
 		'').replace('\\', '/')
 	p.inside_vlib_file = os.dir(path).contains('lib')
-	p.inside_test_file = p.file_base.ends_with('_test.v') || p.file_base.ends_with('_test.vv')
-		|| p.file_base.all_before_last('.v').all_before_last('.').ends_with('_test')
 
 	hash := fnv1a.sum64_string(path)
 	p.unique_prefix = hash.hex_full()
@@ -173,7 +171,6 @@ pub fn (mut p Parser) parse() &ast.File {
 	ast_file := &ast.File{
 		path:                  p.file_path
 		path_base:             p.file_base
-		is_test:               p.inside_test_file
 		is_generated:          p.is_generated
 		is_translated:         p.is_translated
 		language:              p.file_backend_mode

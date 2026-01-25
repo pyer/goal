@@ -96,9 +96,6 @@ pub fn eval_comptime_not_user_defined_ident(ident string, the_pref &pref.Prefere
 			'prod' {
 				is_true = the_pref.is_prod
 			}
-			'test' {
-				is_true = the_pref.is_test
-			}
 			'prealloc' {
 				is_true = the_pref.prealloc
 			}

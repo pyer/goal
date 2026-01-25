@@ -248,7 +248,6 @@ mut:
 	generated_free_methods map[ast.Type]bool
 	autofree_scope_stmts   []string
 	use_segfault_handler   bool = true
-	test_function_names    []string
 	/////////
 	// out_parallel []strings.Builder
 	// out_idx      int
@@ -349,11 +348,6 @@ pub fn gen(mut table ast.Table, pref_ &pref.Preferences, files []&ast.File) stri
 
 	global_g.type_resolver = type_resolver.TypeResolver.new(table, global_g)
 	global_g.comptime = &global_g.type_resolver.info
-	// anon fn may include assert and thus this needs
-	// to be included before any test contents are written
-	if pref_.is_test {
-		global_g.write_tests_definitions()
-	}
 
 	util.timing_start('cgen init')
 	for mod in global_g.table.modules {
@@ -742,9 +736,6 @@ pub fn (mut g Gen) init() {
 	if g.pref.is_prod {
 		g.comptime_definitions.writeln('#define _VPROD (1)')
 	}
-	if g.pref.is_test {
-		g.comptime_definitions.writeln('#define _VTEST (1)')
-	}
 	if g.pref.autofree {
 		g.comptime_definitions.writeln('#define _VAUTOFREE (1)')
 	}
@@ -766,12 +757,7 @@ pub fn (mut g Gen) init() {
 }
 
 pub fn (mut g Gen) finish() {
-//	g.handle_embedded_files_finish()
-	if g.pref.is_test {
-		g.gen_c_main_for_tests()
-	} else {
 		g.gen_c_main()
-	}
 }
 
 // get_sumtype_variant_type_name returns the variant type name according to its type
@@ -5804,15 +5790,6 @@ fn (mut g Gen) return_stmt(node ast.Return) {
 		ftyp := g.styp(type0)
 		mut is_regular_option := ftyp == '_option'
 		if option_none || is_regular_option || type0 == ast.error_type_idx {
-			if g.fn_decl != unsafe { nil } && g.fn_decl.is_test {
-				test_error_var := g.new_tmp_var()
-				g.write('${ret_typ} ${test_error_var} = ')
-				g.gen_option_error(fn_ret_type, expr0)
-				g.writeln(';')
-				g.write_defer_stmts_when_needed(node.scope, true, node.pos)
-				g.gen_failing_return_error_for_test_fn(node, test_error_var)
-				return
-			}
 			if use_tmp_var {
 				g.write('${ret_typ} ${tmpvar} = ')
 			} else {
@@ -5843,15 +5820,6 @@ fn (mut g Gen) return_stmt(node ast.Return) {
 		ftyp := g.styp(type0)
 		mut is_regular_result := ftyp == result_name
 		if is_regular_result || type0 == ast.error_type_idx {
-			if g.fn_decl != unsafe { nil } && g.fn_decl.is_test {
-				test_error_var := g.new_tmp_var()
-				g.write('${ret_typ} ${test_error_var} = ')
-				g.gen_result_error(fn_ret_type, expr0)
-				g.writeln(';')
-				g.write_defer_stmts_when_needed(node.scope, true, node.pos)
-				g.gen_failing_return_error_for_test_fn(node, test_error_var)
-				return
-			}
 			if use_tmp_var {
 				g.write('${ret_typ} ${tmpvar} = ')
 			} else {
@@ -6938,7 +6906,7 @@ fn (mut g Gen) or_block(var_name string, or_block ast.OrExpr, return_type ast.Ty
 	if or_block.kind == .block {
 		g.or_expr_return_type = return_type.clear_option_and_result()
 		if or_block.err_used
-			|| (g.fn_decl != unsafe { nil } && (g.fn_decl.is_main || g.fn_decl.is_test)) {
+			|| (g.fn_decl != unsafe { nil } && g.fn_decl.is_main) {
 			g.writeln('\tIError err = ${cvar_name}${tmp_op}err;')
 		}
 
@@ -6975,8 +6943,6 @@ fn (mut g Gen) or_block(var_name string, or_block ast.OrExpr, return_type ast.Ty
 			} else {
 				g.writeln('\tbuiltin__panic_result_not_set(${err_msg});')
 			}
-		} else if g.fn_decl != unsafe { nil } && g.fn_decl.is_test {
-			g.gen_failing_error_propagation_for_test_fn(or_block, cvar_name)
 		} else {
 			// In ordinary functions, `opt()!` call is sugar for:
 			// `opt() or { return err }`
@@ -7010,8 +6976,6 @@ fn (mut g Gen) or_block(var_name string, or_block ast.OrExpr, return_type ast.Ty
 			} else {
 				g.writeln('\tbuiltin__panic_option_not_set( ${err_msg} );')
 			}
-		} else if g.fn_decl != unsafe { nil } && g.fn_decl.is_test {
-			g.gen_failing_error_propagation_for_test_fn(or_block, cvar_name)
 		} else {
 			// In ordinary functions, `opt()?` call is sugar for:
 			// `opt() or { return err }`
@@ -7305,6 +7269,7 @@ fn (mut g Gen) type_default_impl(typ_ ast.Type, decode_sumtype bool) string {
 	}
 }
 
+/*
 fn (g &Gen) get_all_test_function_names() []string {
 	mut tfuncs := []string{}
 	mut tsuite_begin := ''
@@ -7333,6 +7298,7 @@ fn (g &Gen) get_all_test_function_names() []string {
 	}
 	return all_tfuncs
 }
+*/
 
 @[inline]
 fn (mut g Gen) get_type(typ ast.Type) ast.Type {
