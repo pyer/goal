@@ -68,6 +68,9 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 			'-vls-mode' {
 				res.is_vls = true
 			}
+			'-progress' {
+				res.is_progress = true
+			}
 			'-verbose' {
 				res.is_verbose = true
 			}
@@ -77,9 +80,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 			}
 			'-v', '-V', '-version', '--version' {
         res.show_version = true
-			}
-			'-progress' {
-				// processed by testing tools in cmd/tools/modules/testing/common.v
 			}
 			'-Wimpure-v' {
 				res.warn_impure_v = true
@@ -151,10 +151,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 			}
 			'-file-list' {
 				res.file_list = cmdline.option(args[i..], arg, '').split_any(',')
-				i++
-			}
-			'-test-runner' {
-				res.test_runner = cmdline.option(args[i..], arg, res.test_runner)
 				i++
 			}
 			'-use-os-system-to-run' {

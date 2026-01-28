@@ -33,6 +33,7 @@ fn (mut g Gen) assert_stmt(original_assert_statement ast.AssertStmt) {
 	}
 	metaname := g.gen_assert_metainfo_common(node)
 	g.inside_ternary++
+/*
 	if g.pref.is_test {
 		g.write('if (')
 		prev_inside_ternary := g.inside_ternary
@@ -50,6 +51,7 @@ fn (mut g Gen) assert_stmt(original_assert_statement ast.AssertStmt) {
 		g.gen_assert_postfailure_mode(node)
 		g.writeln('}')
 	} else {
+*/
 		g.write('if (!(')
 		prev_inside_ternary := g.inside_ternary
 		g.inside_ternary = 0
@@ -62,8 +64,9 @@ fn (mut g Gen) assert_stmt(original_assert_statement ast.AssertStmt) {
 		g.writeln('\tbuiltin____print_assert_failure(&${metaname});')
 		g.gen_assert_postfailure_mode(node)
 		g.writeln('}')
-	}
-
+/*
+  }
+*/
 	if mut node.expr is ast.InfixExpr {
 		if node.expr.left is ast.CTempVar {
 			node.expr.left = save_left

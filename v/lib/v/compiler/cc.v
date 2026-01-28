@@ -251,7 +251,9 @@ pub fn cc(pref_ &pref.Preferences) {
 		//os.chdir(vdir) or {}
 
 		// Print the C command
-		println(cmd)
+		if pref_.is_progress {
+		  println(cmd)
+		}
 		// Run
 		res := os.execute(cmd)
 		if res.exit_code != 0 {

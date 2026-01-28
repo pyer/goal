@@ -23,8 +23,6 @@ pub enum ColorOutput {
 	never
 }
 
-pub const supported_test_runners = ['normal', 'simple', 'tap', 'dump', 'teamcity']
-
 @[heap; minify]
 pub struct Preferences {
 pub mut:
@@ -34,6 +32,7 @@ pub mut:
 	// verbosity           VerboseLevel
 	is_debug           bool // turned on by -g/-debug or -cg/-cdebug, it tells v to pass -g to the C backend compiler.
 	is_prod            bool   // use "-O3"
+	is_progress        bool
 	no_prod_options    bool   // `-no-prod-options`, means do not pass any optimization flags to the C compilation, while still allowing the user to use for example `-cflags -Os` to pass custom ones
   is_run             bool // run the executable after compilation
 	is_test            bool   // `v string_test.v`
@@ -50,7 +49,6 @@ pub mut:
 	is_check_return    bool     // -check-return, will make V produce notices about *all* call expressions with unused results. NOTE: experimental!
 	is_check_overflow  bool     // -check-overflow, will panic on integer overflow
   keepc              bool     // keep the C source file
-	test_runner        string   // can be 'simple' (fastest, but much less detailed), 'tap', 'normal'
 	translated         bool     // `v translate doom.v` are we running V code translated from C? allow globals, ++ expressions, etc
 	hide_auto_str      bool // `v -hide-auto-str program.v`, doesn't generate str() with struct data
 	sanitize               bool // use Clang's new "-fsanitize" option
@@ -187,10 +185,6 @@ fn (mut prefs Preferences) parse_define(define string) {
 			prefs.compile_defines << dname
 		}
 	}
-}
-
-pub fn supported_test_runners_list() string {
-	return supported_test_runners.map('`${it}`').join(', ')
 }
 
 pub fn (pref &Preferences) should_trace_fn_name(fname string) bool {

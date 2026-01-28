@@ -45,10 +45,14 @@ fn main() {
     return
   }
 
-  println('Building ${prefs.path} => ${prefs.target_c} => ${prefs.target}')
+  if prefs.is_progress {
+    println('Building ${prefs.path} => ${prefs.target_c} => ${prefs.target}')
+  }
 
   // Construct the V object from command line arguments
-  println('Get builtin and user files')
+  if prefs.is_progress {
+    println('Get builtin and user files')
+  }
   mut files := parser.get_builtin_files(prefs)
   files << parser.get_source_file(prefs)
   if prefs.is_verbose {
@@ -60,14 +64,20 @@ fn main() {
   mut table := ast.new_table()
   table.pointer_size = if prefs.m64 { 8 } else { 4 }
 
-  println('Parse files')
+  if prefs.is_progress {
+    println('Parse files')
+  }
   mut parsed_files := parser.parse_files(files, mut table, prefs)
-  println('Parse imports')
+  if prefs.is_progress {
+    println('Parse imports')
+  }
   parser.parse_imports(mut parsed_files, mut table, prefs)
 
   table.generic_insts_to_concrete()
 
-  println('Check files')
+  if prefs.is_progress {
+    println('Check files')
+  }
   mut check := checker.new_checker(table, prefs)
   check.check_files(parsed_files)
 
@@ -93,18 +103,24 @@ fn main() {
   }
 
   // Generate C source
-  println('Generate ${prefs.target_c}')
+  if prefs.is_progress {
+    println('Generate ${prefs.target_c}')
+  }
   source := c.gen(mut table, prefs, parsed_files)
   os.write_file_array(prefs.target_c, source) or { panic(err) }
 
   // Compile C source
-  println('Compile ${prefs.target_c} to ${prefs.target}')
+  if prefs.is_progress {
+    println('Compile ${prefs.target_c} to ${prefs.target}')
+  }
   compiler.cc(prefs)
 
   util.free_caches()
   if prefs.is_run || prefs.is_test {
     mut cmd := prefs.target
-    println("Execute ${cmd}")
+    if prefs.is_progress {
+      println("Execute ${cmd}")
+    }
     if !prefs.target.starts_with('/') {
       cmd = "./" + prefs.target
     }
