@@ -1,8 +1,7 @@
 #!/bin/bash
 echo "Build"
-v -path ".|lib" -prod -gc none -o v1 v.v
+v -path "vlib" -prod -gc none -o g v.v
 echo "Test"
-./v1 v.v
-./v
-./v -run hello
+./g
+./g -run hello
 rm -f hello

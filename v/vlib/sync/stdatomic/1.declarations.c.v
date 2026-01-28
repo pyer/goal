@@ -1,7 +1,7 @@
 module stdatomic
 
-#flag -I lib/sync/stdatomic
-#insert "lib/sync/stdatomic/atomic.h"
+#flag -I vlib/sync/stdatomic
+#insert "vlib/sync/stdatomic/atomic.h"
 
 // The following functions are actually generic in C
 fn C.atomic_load_ptr(voidptr) voidptr
