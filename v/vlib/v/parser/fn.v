@@ -28,9 +28,6 @@ fn (mut p Parser) call_expr(language ast.Language, mod string) ast.CallExpr {
 	} else {
 		name
 	}
-	if language != .v {
-		p.check_for_impure_v(language, first_pos)
-	}
 	mut or_kind := ast.OrKind.absent
 	if fn_name == 'json.decode' || fn_name == 'C.va_arg' {
 		p.expecting_type = true // Makes name_expr() parse the type `User` in `json.decode(User, txt)`
@@ -485,11 +482,8 @@ fn (mut p Parser) fn_decl() ast.FnDecl {
 		p.error_with_pos('attribute [keep_args_alive] is only supported for C functions',
 			language_tok_pos)
 	}
-	if language != .v {
-		p.check_for_impure_v(language, language_tok_pos)
-		if language == .c {
-			is_unsafe = !is_trusted
-		}
+	if language == .c {
+		is_unsafe = !is_trusted
 	}
 	// Receiver?
 	mut rec := ReceiverParsingInfo{
@@ -999,10 +993,6 @@ fn (mut p Parser) fn_receiver(mut params []ast.Param, mut rec ReceiverParsingInf
 		rec.typ = rec.typ.set_flag(.atomic_f)
 	}
 
-	if rec.language != .v {
-		p.check_for_impure_v(rec.language, rec.type_pos)
-	}
-
 	p.check(.rpar)
 
 	params << ast.Param{
@@ -1250,10 +1240,6 @@ fn (mut p Parser) fn_params() ([]ast.Param, bool, bool, bool) {
 				}
 				p.next()
 			}
-			alanguage := p.table.sym(param_type).language
-			if alanguage != .v {
-				p.check_for_impure_v(alanguage, pos)
-			}
 			params << ast.Param{
 				pos:        pos
 				name:       name
@@ -1370,10 +1356,6 @@ fn (mut p Parser) fn_params() ([]ast.Param, bool, bool, bool) {
 				typ = ast.new_type(p.table.find_or_register_array(typ)).derive(typ).set_nr_muls(0).set_flag(.variadic)
 			}
 			for i, para_name in param_names {
-				alanguage := p.table.sym(typ).language
-				if alanguage != .v {
-					p.check_for_impure_v(alanguage, type_pos[i])
-				}
 				params << ast.Param{
 					pos:        param_pos[i]
 					name:       para_name

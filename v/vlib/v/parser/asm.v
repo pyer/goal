@@ -52,8 +52,6 @@ fn (mut p Parser) asm_stmt(is_top_level bool) ast.AsmStmt {
 		p.next()
 	}
 
-	p.check_for_impure_v(ast.pref_arch_to_table_language(arch), p.prev_tok.pos())
-
 	p.check(.lcbr)
 	p.scope = &ast.Scope{
 		parent:               unsafe { nil } // you shouldn't be able to reference other variables in assembly blocks

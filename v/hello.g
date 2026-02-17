@@ -1,3 +1,4 @@
-import hello
+//import hello
 
-println(hello.hello())
+//println(hello.hello())
+println("hello")

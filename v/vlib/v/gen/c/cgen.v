@@ -5714,7 +5714,7 @@ fn (mut g Gen) return_stmt(node ast.Return) {
 
 	if exprs_len > 0 {
 		// skip `return $vweb.html()`
-		if expr0 is ast.ComptimeCall && expr0.is_vweb {
+		if expr0 is ast.ComptimeCall {
 			g.inside_return_tmpl = true
 			g.expr(expr0)
 			g.inside_return_tmpl = false
@@ -6275,10 +6275,12 @@ fn (mut g Gen) write_init_function() {
 		g.write('\tas_cast_type_indexes = ')
 		g.writeln(g.as_cast_name_table())
 	}
+/*
 	if !g.pref.skip_unused || g.table.used_features.used_fns['builtin_init'] {
 		// shared object does not need this
 		g.writeln('\tbuiltin__builtin_init();')
 	}
+*/
 
 	// reflection bootstrapping
 	if g.has_reflection {

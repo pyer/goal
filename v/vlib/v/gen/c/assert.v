@@ -33,8 +33,29 @@ fn (mut g Gen) assert_stmt(original_assert_statement ast.AssertStmt) {
 	}
 	metaname := g.gen_assert_metainfo_common(node)
 	g.inside_ternary++
+
 /*
-	if g.pref.is_test {
+-       if g.pref.is_test {
+-               g.write('if (')
+-               prev_inside_ternary := g.inside_ternary
+-               g.inside_ternary = 0
+-               g.expr(node.expr)
+-               g.inside_ternary = prev_inside_ternary
+-               g.write(')')
+-               g.decrement_inside_ternary()
+-               g.writeln(' {')
+-               g.gen_assert_metainfo(node, .pass, metaname)
+-               g.writeln('\tmain__TestRunner_name_table[test_runner._typ]._method_assert_pass(test_runner._object, &${metaname});')
+-               g.writeln('} else {')
+-               g.gen_assert_metainfo(node, .fail, metaname)
+-               g.writeln('\tmain__TestRunner_name_table[test_runner._typ]._method_assert_fail(test_runner._object, &${metaname});')
+-               g.gen_assert_postfailure_mode(node)
+-               g.writeln('}')
+-       } else {
+*/
+
+
+
 		g.write('if (')
 		prev_inside_ternary := g.inside_ternary
 		g.inside_ternary = 0
@@ -44,29 +65,13 @@ fn (mut g Gen) assert_stmt(original_assert_statement ast.AssertStmt) {
 		g.decrement_inside_ternary()
 		g.writeln(' {')
 		g.gen_assert_metainfo(node, .pass, metaname)
-		g.writeln('\tmain__TestRunner_name_table[test_runner._typ]._method_assert_pass(test_runner._object, &${metaname});')
-		g.writeln('} else {')
-		g.gen_assert_metainfo(node, .fail, metaname)
-		g.writeln('\tmain__TestRunner_name_table[test_runner._typ]._method_assert_fail(test_runner._object, &${metaname});')
-		g.gen_assert_postfailure_mode(node)
-		g.writeln('}')
-	} else {
-*/
-		g.write('if (!(')
-		prev_inside_ternary := g.inside_ternary
-		g.inside_ternary = 0
-		g.expr(node.expr)
-		g.inside_ternary = prev_inside_ternary
-		g.write('))')
-		g.decrement_inside_ternary()
-		g.writeln(' {')
+		g.writeln('\tbuiltin____assert_success(&${metaname});')
+    g.writeln('} else {')
 		g.gen_assert_metainfo(node, .panic, metaname)
-		g.writeln('\tbuiltin____print_assert_failure(&${metaname});')
-		g.gen_assert_postfailure_mode(node)
+		g.writeln('\tbuiltin____assert_failure(&${metaname});')
+	  g.write_v_source_line_info_stmt(node)
 		g.writeln('}')
-/*
-  }
-*/
+
 	if mut node.expr is ast.InfixExpr {
 		if node.expr.left is ast.CTempVar {
 			node.expr.left = save_left
@@ -110,26 +115,6 @@ fn (mut g Gen) assert_subexpression_to_ctemp(expr ast.Expr, expr_type ast.Type) 
 		else {}
 	}
 	return unsupported_ctemp_assert_transform
-}
-
-fn (mut g Gen) gen_assert_postfailure_mode(node ast.AssertStmt) {
-	g.write_v_source_line_info_stmt(node)
-	if g.pref.assert_failure_mode == .continues
-		|| g.fn_decl.attrs.any(it.name == 'assert_continues') {
-		return
-	}
-	if g.pref.assert_failure_mode == .aborts || g.fn_decl.attrs.any(it.name == 'assert_aborts') {
-		g.writeln('\tabort();')
-	}
-	if g.pref.assert_failure_mode == .backtraces
-		|| g.fn_decl.attrs.any(it.name == 'assert_backtraces') {
-		if _ := g.table.fns['print_backtrace'] {
-			g.writeln('\tprint_backtrace();')
-		}
-	}
-	if g.pref.assert_failure_mode != .continues {
-		g.writeln('\tbuiltin___v_panic(_S("Assertion failed..."));')
-	}
 }
 
 fn (mut g Gen) gen_assert_metainfo(node ast.AssertStmt, kind AssertMetainfoKind, metaname string) {

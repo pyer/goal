@@ -79,67 +79,6 @@ fn (mut g Gen) comptime_call(mut node ast.ComptimeCall) {
 		g.write('${g.defer_return_tmp_var}')
 		return
 	}
-	if node.is_vweb {
-		is_html := node.kind == .html
-		mut cur_line := ''
-
-		if !is_html {
-			cur_line = g.go_before_last_stmt()
-		}
-
-		ret_sym := g.table.sym(g.fn_decl.return_type)
-		fn_name := g.fn_decl.name.replace('.', '__') + node.pos.pos.str()
-		is_x_vweb := ret_sym.cname == 'x__vweb__Result'
-		is_veb := ret_sym.cname == 'veb__Result'
-
-		for stmt in node.veb_tmpl.stmts {
-			if stmt is ast.FnDecl {
-				if stmt.name.starts_with('main.veb_tmpl') {
-					if is_html {
-						g.inside_vweb_tmpl = true
-						if is_veb {
-							g.vweb_filter_fn_name = 'veb__filter'
-						} else if is_x_vweb {
-							g.vweb_filter_fn_name = 'x__vweb__filter'
-						} else {
-							g.vweb_filter_fn_name = 'vweb__filter'
-						}
-					}
-					// insert stmts from vweb_tmpl fn
-					g.stmts(stmt.stmts.filter(it !is ast.Return))
-					//
-					g.inside_vweb_tmpl = false
-					g.vweb_filter_fn_name = ''
-					break
-				}
-			}
-		}
-
-		if is_html {
-			// return a vweb or x.vweb html template
-			if is_veb {
-				ctx_name := g.fn_decl.params[1].name
-				g.writeln('veb__Context_html(${ctx_name}, _tmpl_res_${fn_name});')
-			} else if is_x_vweb {
-				ctx_name := g.fn_decl.params[1].name
-				g.writeln('x__vweb__Context_html(${ctx_name}, _tmpl_res_${fn_name});')
-			} else {
-				// old vweb:
-				app_name := g.fn_decl.params[0].name
-				g.writeln('vweb__Context_html(&${app_name}->Context, _tmpl_res_${fn_name});')
-			}
-			g.writeln('strings__Builder_free(&sb_${fn_name});')
-			g.writeln('builtin__string_free(&_tmpl_res_${fn_name});')
-		} else {
-			// return $tmpl string
-			g.write(cur_line)
-			if g.inside_return_tmpl {
-				g.write('return ')
-			}
-			g.write('_tmpl_res_${fn_name}')
-		}
-		return
-	}
 	left_type := g.unwrap_generic(node.left_type)
 	sym := g.table.sym(left_type)
 	g.trace_autofree('// \$method call. sym="${sym.name}"')
@@ -276,12 +215,6 @@ fn (mut g Gen) comptime_call(mut node ast.ComptimeCall) {
 		// p.error('`$p.expr_var.name` needs to be a reference')
 		// }
 		amp := '' // if receiver.is_mut && !p.expr_var.ptr { '&' } else { '' }
-		if node.is_vweb {
-			if j > 0 {
-				g.write(' else ')
-			}
-			g.write('if (builtin__string__eq(${node.method_name}, _S("${method.name}"))) ')
-		}
 		g.write('${g.cc_type(left_type, false)}_${method.name}(${amp} ')
 		g.expr(node.left)
 		g.writeln(');')

@@ -33,7 +33,6 @@ pub mut:
 	is_debug           bool // turned on by -g/-debug or -cg/-cdebug, it tells v to pass -g to the C backend compiler.
 	is_prod            bool   // use "-O3"
 	is_progress        bool
-	no_prod_options    bool   // `-no-prod-options`, means do not pass any optimization flags to the C compilation, while still allowing the user to use for example `-cflags -Os` to pass custom ones
   is_run             bool // run the executable after compilation
 	is_test            bool   // `v string_test.v`
 	is_verbose         bool
@@ -41,7 +40,6 @@ pub mut:
 	show_timings       bool // show how much time each compiler stage took
 	show_version       bool // -v, -V, -version or --version was passed
 	show_help          bool // -?, -h, -help or --help was passed
-	is_vweb            bool // skip _ var warning in templates
 	is_apk             bool     // build as Android .apk format
 	is_cstrict         bool     // turn on more C warnings; slightly slower
 	is_callstack       bool     // turn on callstack registers on each call when v.debug is imported
@@ -98,7 +96,6 @@ pub mut:
 
 	skip_warnings    bool // like C's "-w", forces warnings to be ignored.
 	skip_notes       bool // force notices to be ignored/not shown.
-	warn_impure_v    bool // -Wimpure-v, force a warning for JS.fn()/C.fn(), outside of .js.v/.c.v files. TODO: turn to an error by default
 	warns_are_errors bool // -W, like C's "-Werror", treat *every* warning is an error
 	notes_are_errors bool // -N, treat *every* notice as an error
 	fatal_errors     bool // unconditionally exit after the first error with exit(1)
@@ -151,11 +148,6 @@ fn must_exist(path string) {
 	if !os.exists(path) {
 		eprintln_exit('v expects that `${path}` exists, but it does not')
 	}
-}
-
-@[inline]
-fn is_source_file(path string) bool {
-	return path.ends_with('.v') || os.exists(path)
 }
 
 fn (mut prefs Preferences) parse_compile_value(define string) {

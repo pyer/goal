@@ -17,39 +17,6 @@ fn (mut p Parser) language_not_allowed_warning(language ast.Language, pos token.
 		pos)
 }
 
-fn (mut p Parser) check_for_impure_v(language ast.Language, pos token.Pos) {
-	if language == .v {
-		// pure V code is always allowed everywhere
-		return
-	} else {
-		match p.file_backend_mode {
-			.c {
-				if language != .c {
-					p.language_not_allowed_error(language, pos)
-					return
-				}
-			}
-			.js {
-				if language != .js {
-					p.language_not_allowed_error(language, pos)
-					return
-				}
-			}
-			else {}
-		}
-	}
-	if !p.pref.warn_impure_v {
-		// the stricter mode is not ON yet => allow everything for now
-		return
-	}
-	if p.file_backend_mode != language {
-		if p.file_backend_mode == .v {
-			p.language_not_allowed_warning(language, pos)
-			return
-		}
-	}
-}
-
 fn (mut p Parser) error(s string) ast.NodeError {
 	return p.error_with_pos(s, p.tok.pos())
 }

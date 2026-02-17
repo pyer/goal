@@ -147,9 +147,7 @@ fn ccompiler_options(ccompiler string, pref_ &pref.Preferences) CcompilerOptions
 	}
 	if pref_.is_prod {
 		// don't warn for vlib tests
-		if !pref_.no_prod_options {
-			ccoptions.args << optimization_options
-		}
+		ccoptions.args << optimization_options
 	}
 	if pref_.is_prod && !ccoptions.debug_mode {
 		// sokol and other C libraries that use asserts
@@ -256,13 +254,16 @@ pub fn cc(pref_ &pref.Preferences) {
 		}
 		// Run
 		res := os.execute(cmd)
-		if res.exit_code != 0 {
-				verror('C compiler error, while attempting to run: \n' +
+		if res.exit_code == 0 {
+		  if pref_.is_verbose {
+			  show_c_compiler_output(ccompiler, res)
+		  }
+    } else {
+			eprintln('C compiler error, while attempting to run: \n' +
                '${cmd}\n' +
                'Error: ${res.exit_code}\n')
-		}
-		if pref_.is_verbose {
 			show_c_compiler_output(ccompiler, res)
+      exit(1)
 		}
 		post_process_c_compiler_output(ccompiler, res, pref_)
 		//os.chdir(original_pwd) or {}

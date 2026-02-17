@@ -4,7 +4,7 @@ module checker
 
 import os
 import v.ast
-import v.pref
+//import v.pref
 import v.util
 import v.type_resolver
 import strings
@@ -89,41 +89,6 @@ fn (mut c Checker) comptime_call(mut node ast.ComptimeCall) ast.Type {
 		}
 		return c.table.find_type('v.embed_file.EmbedFileData')
 	}
-	if node.is_vweb {
-		// TODO: assoc parser bug
-		save_cur_fn := c.table.cur_fn
-		pref_ := *c.pref
-		pref2 := &pref.Preferences{
-			...pref_
-			is_vweb: true
-		}
-		mut c2 := new_checker(c.table, pref2)
-		c2.comptime_call_pos = node.pos.pos
-		c2.check(mut node.veb_tmpl)
-		c.warnings << c2.warnings
-		c.errors << c2.errors
-		c.notices << c2.notices
-		c.nr_warnings += c2.nr_warnings
-		c.nr_errors += c2.nr_errors
-		c.nr_notices += c2.nr_notices
-
-		c.table.cur_fn = save_cur_fn
-	}
-	if node.kind == .html {
-		ret_sym := c.table.sym(c.table.cur_fn.return_type)
-		if ret_sym.cname !in ['veb__Result', 'vweb__Result', 'x__vweb__Result'] {
-			ct_call := if node.is_veb { 'veb' } else { 'vweb' }
-			c.error('`\$${ct_call}.html()` must be called inside a web method, e.g. `fn (mut app App) foo(mut ctx Context) ${ct_call}.Result { return \$${ct_call}.html(\'index.html\') }`',
-				node.pos)
-		}
-		rtyp := if node.is_veb {
-			c.table.find_type('veb.Result')
-		} else {
-			c.table.find_type('vweb.Result')
-		}
-		node.result_type = rtyp
-		return rtyp
-	}
 	if node.method_name == 'method' {
 		if c.inside_anon_fn && 'method' !in c.cur_anon_fn.inherited_vars.map(it.name) {
 			c.error('undefined ident `method` in the anonymous function', node.pos)
@@ -169,9 +134,6 @@ fn (mut c Checker) comptime_call(mut node ast.ComptimeCall) ast.Type {
 		}
 
 		return c.fn_return_type
-	}
-	if node.is_vweb {
-		return ast.string_type
 	}
 	// s.$my_str()
 	v := node.scope.find_var(node.method_name) or {

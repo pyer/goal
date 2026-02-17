@@ -43,7 +43,6 @@ fn (mut p Parser) struct_decl(is_anon bool) ast.StructDecl {
 			p.struct_language = old_struct_language
 		}
 	}
-	p.check_for_impure_v(language, name_pos)
 	if p.disallow_declarations_in_script_mode() {
 		return ast.StructDecl{}
 	}
@@ -312,7 +311,6 @@ fn (mut p Parser) struct_decl(is_anon bool) ast.StructDecl {
 				}
 
 				// for field_name []fn, cgen will generate closure, so detect here
-				if p.file_backend_mode == .v || p.file_backend_mode == .c {
 					sym := p.table.sym(typ)
 					mut elem_kind := ast.Kind.placeholder
 					if sym.kind == .array && (sym.info is ast.Array || sym.info is ast.Alias) {
@@ -324,7 +322,6 @@ fn (mut p Parser) struct_decl(is_anon bool) ast.StructDecl {
 					if elem_kind == .function {
 						p.register_auto_import('builtin.closure')
 					}
-				}
 
 				field_pos = field_start_pos.extend(p.prev_tok.pos())
 				if typ.has_option_or_result() {
@@ -702,7 +699,6 @@ fn (mut p Parser) interface_decl() ast.InterfaceDecl {
 		[]
 	}
 	mut pre_comment_string := ''
-	p.check_for_impure_v(language, name_pos)
 	if p.disallow_declarations_in_script_mode() {
 		return ast.InterfaceDecl{}
 	}

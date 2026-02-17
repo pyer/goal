@@ -547,7 +547,7 @@ fn (mut c Checker) check_valid_snake_case(name string, identifier string, pos to
 	if c.pref.translated || c.file.is_translated {
 		return
 	}
-	if !c.pref.is_vweb && name.len > 1 && (name[0] == `_` || name.contains('._')) {
+	if name.len > 1 && (name[0] == `_` || name.contains('._')) {
 		c.error('${identifier} `${name}` cannot start with `_`', pos)
 	}
 	if util.contains_capital(name) {
@@ -4302,7 +4302,7 @@ fn (mut c Checker) ident(mut node ast.Ident) ast.Type {
 					// inside vweb tmpl ident positions are meaningless, use the position of the comptime call.
 					// if the variable is declared before the comptime call then we can assume all is well.
 					// `node.name !in node.scope.objects && node.scope.start_pos < c.comptime_call_pos` (inherited)
-					node_pos := if c.pref.is_vweb && node.name !in node.scope.objects
+					node_pos := if node.name !in node.scope.objects
 						&& node.scope.start_pos < c.comptime_call_pos {
 						c.comptime_call_pos
 					} else {

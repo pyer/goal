@@ -524,9 +524,6 @@ fn (mut w Walker) expr(node_ ast.Expr) {
 		}
 		ast.ComptimeCall {
 			w.expr(node.left)
-			if node.is_vweb {
-				w.stmts(node.veb_tmpl.stmts)
-			}
 			if node.kind == .embed_file {
 				w.features.used_maps++
 			}

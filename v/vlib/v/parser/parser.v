@@ -1286,9 +1286,6 @@ fn (mut p Parser) name_expr() ast.Expr {
 		'WASM' { ast.Language.wasm }
 		else { ast.Language.v }
 	}
-	if language != .v {
-		p.check_for_impure_v(language, p.tok.pos())
-	}
 	is_option := p.tok.kind == .question
 	if is_option {
 		if p.peek_tok.kind in [.name, .lsbr] {
@@ -2795,7 +2792,6 @@ fn (mut p Parser) type_decl() ast.TypeDecl {
 	if parent_type != 0 {
 		parent_sym := p.table.sym(parent_type)
 		parent_language = parent_sym.language
-		p.check_for_impure_v(parent_sym.language, decl_pos)
 	}
 	prepend_mod_name := if language == .v { p.prepend_mod(name) } else { name } // `C.time_t`, not `time.C.time_t`
 	idx := p.table.register_sym(ast.TypeSymbol{

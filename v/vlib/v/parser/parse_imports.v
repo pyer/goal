@@ -136,10 +136,12 @@ pub fn parse_imports(mut all_parsed_files []&ast.File, mut table ast.Table, pref
 				break
 			}
 			v_files := v_files_from_dir(import_path)
+      /*
 			if v_files.len == 0 {
 				all_parsed_files[i].errors << error_with_pos('cannot import module "${mod}" (no .v files in "${import_path}")', ast_file.path, imp.pos)
 				continue
 			}
+      */
 			// eprintln('>> ast_file.path: $ast_file.path , done: $done_imports, `import $mod` => $v_files')
 			// Add all imports referenced by these libs
 			parsed_files := parse_files(v_files, mut table, pref_)

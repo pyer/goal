@@ -2166,8 +2166,6 @@ pub:
 	kind        ComptimeCallKind
 	method_pos  token.Pos
 	scope       &Scope = unsafe { nil }
-	is_vweb     bool
-	is_veb      bool
 	env_pos     token.Pos
 mut:
 	is_d_resolved bool

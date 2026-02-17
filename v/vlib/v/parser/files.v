@@ -43,7 +43,7 @@ pub fn get_source_file(pref_ &pref.Preferences) []string {
     eprintln("${src} is not a file")
     exit(1)
   }
-  if !src.ends_with('.v') {
+  if !src.ends_with('.g') {
     eprintln("${src} is not a source file")
     exit(1)
   }

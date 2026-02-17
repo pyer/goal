@@ -131,7 +131,6 @@ fn (mut p Parser) comptime_call() ast.ComptimeCall {
 	}
 	start_pos := p.tok.pos()
 	p.check(.dollar)
-	mut is_veb := false
 	if p.peek_tok.kind == .dot {
 		name := p.check_name() // skip `vweb.html()` TODO
 		if name != 'vweb' && name != 'veb' {
@@ -151,7 +150,6 @@ fn (mut p Parser) comptime_call() ast.ComptimeCall {
 				return err_node
 			}
 			p.register_used_import('veb')
-			is_veb = true
 		}
 		p.check(.dot)
 	}
@@ -365,8 +363,6 @@ fn (mut p Parser) comptime_call() ast.ComptimeCall {
 	file.path = tmpl_path
 	return ast.ComptimeCall{
 		scope:       unsafe { nil }
-		is_vweb:     true
-		is_veb:      is_veb
 		veb_tmpl:    file
 		method_name: method_name
 		kind:        if is_html { .html } else { .tmpl }

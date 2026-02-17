@@ -34,28 +34,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 				res.wasm_stack_top = cmdline.option(args[i..], arg, res.wasm_stack_top.str()).int()
 				i++
 			}
-			'-assert' {
-				assert_mode := cmdline.option(args[i..], '-assert', '')
-				match assert_mode {
-					'aborts' {
-						res.assert_failure_mode = .aborts
-					}
-					'backtraces' {
-						res.assert_failure_mode = .backtraces
-					}
-					'continues' {
-						res.assert_failure_mode = .continues
-					}
-					else {
-						eprintln('unknown assert mode `-gc ${assert_mode}`, supported modes are:`')
-						eprintln('  `-assert aborts`     .... calls abort() after assertion failure')
-						eprintln('  `-assert backtraces` .... calls print_backtrace() after assertion failure')
-						eprintln('  `-assert continues`  .... does not call anything, just continue after an assertion failure')
-						exit(1)
-					}
-				}
-				i++
-			}
 			'-show-timings' {
 				res.show_timings = true
 			}
@@ -80,9 +58,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 			}
 			'-v', '-V', '-version', '--version' {
         res.show_version = true
-			}
-			'-Wimpure-v' {
-				res.warn_impure_v = true
 			}
 			'-Wfatal-errors' {
 				res.fatal_errors = true
@@ -195,11 +170,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 					arg, '10').int()
 				i++
 			}
-			'-line-info' {
-				res.line_info = cmdline.option(args[i..], arg, '')
-				res.parse_line_info(res.line_info)
-				i++
-			}
 			'-check-return' {
 				res.is_check_return = true
 			}
@@ -207,11 +177,11 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 				res.is_check_overflow = true
 			}
 			else {
-        if arg.ends_with('.v') {
+        if arg.ends_with('.g') {
           res.path = arg
           res.target = arg[..arg.len - 2]
         } else {
-          res.path = arg + '.v'
+          res.path = arg + '.g'
           res.target = arg
         }
         res.target_c = res.target + '.c'
@@ -231,7 +201,7 @@ pub fn parse_args_and_show_errors() (&Preferences) {
     eprintln("${res.path} is not a file")
     exit(1)
   }
-	res.is_test = res.path.ends_with('_test.v')
+	res.is_test = res.path.ends_with('_test.g')
 
 	if res.force_bounds_checking {
 		res.no_bounds_checking = false
