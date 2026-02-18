@@ -40,10 +40,7 @@ pub mut:
 	show_timings       bool // show how much time each compiler stage took
 	show_version       bool // -v, -V, -version or --version was passed
 	show_help          bool // -?, -h, -help or --help was passed
-	is_apk             bool     // build as Android .apk format
 	is_cstrict         bool     // turn on more C warnings; slightly slower
-	is_callstack       bool     // turn on callstack registers on each call when v.debug is imported
-	is_trace           bool     // turn on possibility to trace fn call where v.debug is imported
 	is_check_return    bool     // -check-return, will make V produce notices about *all* call expressions with unused results. NOTE: experimental!
 	is_check_overflow  bool     // -check-overflow, will panic on integer overflow
   keepc              bool     // keep the C source file

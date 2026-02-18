@@ -267,15 +267,7 @@ fn (mut g Gen) gen_fn_decl(node &ast.FnDecl, skip bool) {
 			g.definitions.write_string(');\n')
 
 			orig_fn_args := call_fn.func.params.map(it.name).join(', ')
-			add_trace_hook := g.pref.is_trace
-				&& call_fn.name !in ['v.debug.add_after_call', 'v.debug.add_before_call', 'v.debug.remove_after_call', 'v.debug.remove_before_call']
-			if g.pref.is_callstack {
-				if g.cur_fn.is_method || g.cur_fn.is_static_type_method {
-					g.writeln('\tbuiltin__array_push((array*)&g_callstack, _MOV((v__debug__FnTrace[]){ ((v__debug__FnTrace){.name = _S("${g.table.type_to_str(g.cur_fn.receiver.typ)}.${g.cur_fn.name.all_after_last('__static__')}"),.file = _S("${call_fn.file}"),.line = ${call_fn.line},}) }));')
-				} else {
-					g.writeln('\tbuiltin__array_push((array*)&g_callstack, _MOV((v__debug__FnTrace[]){ ((v__debug__FnTrace){.name = _S("${g.cur_fn.name}"),.file = _S("${call_fn.file}"),.line = ${call_fn.line},}) }));')
-				}
-			}
+			add_trace_hook := call_fn.name !in ['v.debug.add_after_call', 'v.debug.add_before_call', 'v.debug.remove_after_call', 'v.debug.remove_before_call']
 			mut method_name := c_name(call_fn.name)
 			if call_fn.name.contains('_') {
 				parts := call_fn.name.split('_')
@@ -300,9 +292,6 @@ fn (mut g Gen) gen_fn_decl(node &ast.FnDecl, skip bool) {
 					g.writeln('\t\tv__debug__after_call_hook(_S("${call_fn.name}"));')
 					g.writeln('\t}')
 				}
-				if g.pref.is_callstack {
-					g.writeln('\tbuiltin__array_pop((array*)&g_callstack);')
-				}
 			} else {
 				if add_trace_hook {
 					g.writeln('\tif (!g_trace.in_hook) {')
@@ -310,9 +299,6 @@ fn (mut g Gen) gen_fn_decl(node &ast.FnDecl, skip bool) {
 					g.writeln('\t}')
 				}
 				g.writeln('\t${g.styp(call_fn.return_type)} ret = ${method_name}(${orig_fn_args});')
-				if g.pref.is_callstack {
-					g.writeln('\tbuiltin__array_pop((array*)&g_callstack);')
-				}
 				if add_trace_hook {
 					g.writeln('\tif (!g_trace.in_hook) {')
 					g.writeln('\t\tv__debug__after_call_hook(_S("${call_fn.name}"));')

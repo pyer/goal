@@ -87,9 +87,6 @@ pub fn eval_comptime_not_user_defined_ident(ident string, the_pref &pref.Prefere
 		}
 	} else if ident in valid_comptime_if_other {
 		match ident {
-			'apk' {
-				is_true = the_pref.is_apk
-			}
 			'debug' {
 				is_true = the_pref.is_debug
 			}

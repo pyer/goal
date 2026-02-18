@@ -224,13 +224,6 @@ pub fn parse_args_and_show_errors() (&Preferences) {
 		res.cflags += ' -ffast-math'
 	}
 
-	if 'callstack' in res.compile_defines_all {
-		res.is_callstack = true
-	}
-	if 'trace' in res.compile_defines_all {
-		res.is_trace = true
-	}
-
 	if res.is_debug {
 		res.parse_define('debug')
 	}
